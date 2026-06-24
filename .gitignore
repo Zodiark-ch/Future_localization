@@ -1,0 +1,31 @@
+# Python caches
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Local editor and environment files
+.vscode/
+.env
+.env.*
+
+# Local package/build caches
+.cache/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Model checkpoints and large tensor artifacts
+*.pt
+*.pth
+*.bin
+*.safetensors
+*.ckpt
+*.arrow
+
+# CSAT generated experiment outputs
+files/logs/
+files/tmp/
+files/masks/
+files/logical_circuit/
+files/component_k_sweep/
+files/component_scores/

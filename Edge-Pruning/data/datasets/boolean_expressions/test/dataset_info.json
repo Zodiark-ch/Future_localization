@@ -1,0 +1,40 @@
+{
+  "citation": "",
+  "description": "",
+  "features": {
+    "input": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "target": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "length": {
+      "dtype": "int64",
+      "_type": "Value"
+    },
+    "depth": {
+      "dtype": "int64",
+      "_type": "Value"
+    },
+    "corr_input": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "corr_target": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "corr_length": {
+      "dtype": "int64",
+      "_type": "Value"
+    },
+    "corr_depth": {
+      "dtype": "int64",
+      "_type": "Value"
+    }
+  },
+  "homepage": "",
+  "license": ""
+}

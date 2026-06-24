@@ -1,0 +1,47 @@
+{
+    "overall": {
+        "model_name": "HuggingFaceH4/zephyr-7b-beta",
+        "logger": "json",
+        "cache_dir": "/data/zodiark/CSAT/.cache",
+        "seed": 0
+    },
+    "unlearn": {
+        "safe_unlearn_method": "GA",
+        "conflict_unlearn_method": "GA+FT",
+        "safe_mask_path": "/data/zodiark/CSAT/conflict/safe_mask.pt",
+        "conflict_mask_path": "/data/zodiark/CSAT/conflict/conflict_mask.pt",
+        "alternate_frequency": 1,
+        "num_epochs": 6,
+        "lr": 1e-06,
+        "weight_decay": 0.1,
+        "gradient_accumulation_steps": 8,
+        "max_grad_norm": 0.5,
+        "task_name": "downstream",
+        "sophia": false,
+        "p": 0.01,
+        "q": 0.01,
+        "resume_path": null,
+        "max_steps": -1,
+        "use_lora": false,
+        "mu": 1e-06,
+        "GA": {
+            "gamma": 1.0
+        },
+        "GA+FT": {
+            "gamma": 1.0
+        }
+    },
+    "dataset": {
+        "forget_dataset_name": "WMDPCyber",
+        "retain_dataset_name": "sst2",
+        "dataset_seed": 1000,
+        "forget_ratio": 400,
+        "self_retain": false,
+        "batch_size": 1
+    },
+    "logger": {
+        "json": {
+            "root": "/data/zodiark/CSAT/files/logs/conflict_stable"
+        }
+    }
+}

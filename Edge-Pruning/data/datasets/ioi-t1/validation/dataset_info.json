@@ -1,0 +1,64 @@
+{
+  "citation": "",
+  "description": "",
+  "features": {
+    "a": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "b": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "place": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "object": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "template": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "order": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "ioi_sentences": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "corr_a": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "corr_b": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "corr_place": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "corr_object": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "corr_template": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "corr_order": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "corr_ioi_sentences": {
+      "dtype": "string",
+      "_type": "Value"
+    }
+  },
+  "homepage": "",
+  "license": ""
+}

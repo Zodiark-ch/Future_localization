@@ -1,0 +1,40 @@
+{
+  "citation": "",
+  "description": "",
+  "features": {
+    "prefix": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "pronoun": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "template": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "name": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "corr_prefix": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "corr_pronoun": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "corr_template": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "corr_name": {
+      "dtype": "string",
+      "_type": "Value"
+    }
+  },
+  "homepage": "",
+  "license": ""
+}

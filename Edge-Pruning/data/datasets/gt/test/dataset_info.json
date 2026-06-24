@@ -1,0 +1,48 @@
+{
+  "citation": "",
+  "description": "",
+  "features": {
+    "template": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "century": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "noun": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "digits": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "prefix": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "corr_template": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "corr_century": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "corr_noun": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "corr_digits": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "corr_prefix": {
+      "dtype": "string",
+      "_type": "Value"
+    }
+  },
+  "homepage": "",
+  "license": ""
+}

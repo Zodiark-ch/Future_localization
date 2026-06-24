@@ -1,0 +1,32 @@
+{
+  "citation": "",
+  "description": "",
+  "features": {
+    "answer": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "question": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "sentence": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "corr_sentence": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "sentence_token_count": {
+      "dtype": "int64",
+      "_type": "Value"
+    },
+    "corr_sentence_token_count": {
+      "dtype": "int64",
+      "_type": "Value"
+    }
+  },
+  "homepage": "",
+  "license": ""
+}

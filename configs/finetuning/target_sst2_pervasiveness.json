@@ -1,0 +1,52 @@
+{
+    "overall": {
+        "model_name": "HuggingFaceH4/zephyr-7b-beta",
+        "logger": "json",
+        "cache_dir": "/home/chenhang/CSAT/.cache",
+        "seed": 0,
+        "use_cpu": false
+    },
+    "finetuning": {
+        "finetuning_method": "TargetFT+PervasivenessFT",
+        "mask_path": "none",
+        "mask_score_type": "gradient",
+        "mask_ratio": 0.0,
+        "mask_calibration_samples": 128,
+        "num_epochs": 3,
+        "lr": 1e-5,
+        "weight_decay": 0.1,
+        "gradient_accumulation_steps": 4,
+        "max_grad_norm": 1.0,
+        "sophia": false,
+        "p": 0.01,
+        "q": 0.01,
+        "resume_path": null,
+        "max_steps": -1,
+        "use_lora": false,
+        "mu": 1e-6,
+        "target_weight": 1.0,
+        "pervasiveness_weight": 1.0,
+        "kl_weight": 1.0,
+        "alpha": 0.0
+    },
+    "dataset": {
+        "target_dataset_name": "sst2",
+        "pervasiveness_dataset_name": "winogrande",
+        "dataset_seed": 1000,
+        "target_ratio": 1.0,
+        "target_holdout_as_pervasiveness": false,
+        "batch_size": 1
+    },
+    "evaluation": {
+        "target_eval": true,
+        "pervasiveness_eval": true,
+        "pervasiveness_lm_eval_tasks": "boolq,rte,hellaswag,winogrande,arc_challenge,arc_easy,openbookqa,piqa,truthfulqa",
+        "eval_batch_size": 8
+    },
+    "logger": {
+        "name": "finetuning_target_sst2_pervasiveness",
+        "json": {
+            "root": "/home/chenhang/CSAT/files/logs/finetuning"
+        }
+    }
+}

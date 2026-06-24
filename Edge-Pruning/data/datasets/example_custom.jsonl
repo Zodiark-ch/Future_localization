@@ -1,0 +1,12 @@
+{
+    "clean": "1 + 2 = <predict>3</predict>",
+    "corrupted": "1 + 4 = <predict>5</predict>"
+}
+{
+    "clean": "5 + 1 = <predict>6</predict>",
+    "corrupted": "1 + 1 = <predict>2</predict>"
+}
+{
+    "clean": "2 + 2 = <predict>4</predict>",
+    "corrupted": "2 + 4 = <predict>6</predict>"
+}
