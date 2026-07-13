@@ -2,13 +2,13 @@
     "overall": {
         "model_name": "HuggingFaceH4/zephyr-7b-beta",
         "logger": "json",
-        "cache_dir": "/home/chenhang/CSAT/.cache",
+        "cache_dir": null,
         "seed": 0,
         "use_cpu": false
     },
     "finetuning": {
         "finetuning_method": "TargetFT+PervasivenessFT",
-        "mask_path": "none",
+        "mask_path": null,
         "mask_score_type": "gradient",
         "mask_ratio": 0.0,
         "mask_calibration_samples": 128,
@@ -46,7 +46,7 @@
     "logger": {
         "name": "finetuning_target_sst2_pervasiveness",
         "json": {
-            "root": "/home/chenhang/CSAT/files/logs/finetuning"
+            "root": null
         }
     }
 }

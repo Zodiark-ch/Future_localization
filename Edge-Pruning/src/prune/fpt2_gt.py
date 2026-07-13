@@ -192,8 +192,8 @@ class FPT2InfoTrainer(Seq2SeqTrainer):
 @dataclass
 class DataTrainingArguments:
     dataset_path: Optional[str] = field(
-        default="./data/datasets/gt/",
-        metadata={"help": "The path to the directory with the JSON files of the task."},
+        default=None,
+        metadata={"help": "The path to the directory with the JSON files of the task.", "required": True},
     )
     train_split: Optional[str] = field(
         default="train",

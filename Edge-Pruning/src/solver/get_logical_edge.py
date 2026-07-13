@@ -13,20 +13,11 @@ sys.path.append(
 def parse_args():
     parser = argparse.ArgumentParser()
     
-    parser.add_argument("-edge1", "--edge1", type=str, default="/ssd_users/chenhang/EAP-IG/ioi_graph_epoch_init2000.json")
-    parser.add_argument("-edge2", "--edge2", type=str, default="/ssd_users/chenhang/EAP-IG/ioi_graph_epoch_init2000_or.json")
+    parser.add_argument("-edge1", "--edge1", type=str, required=True)
+    parser.add_argument("-edge2", "--edge2", type=str, required=True)
     parser.add_argument("-w", "--with_embedding_nodes", action="store_true", default=True)
-    parser.add_argument("-o", "--output", type=str, default="")
-    
-    args = parser.parse_args()
-    
-    if args.output == "":
-        
-        args.output = os.path.join("/ssd_users/chenhang/EAP-IG", "ioi_graph_epoch0_edges_bool.json")
-    else:
-        raise ValueError("Output file must be specified when comparing two models") 
-    
-    return args
+    parser.add_argument("-o", "--output", type=str, required=True)
+    return parser.parse_args()
 
 def add_o_suffix_to_nodes(edges):
     """

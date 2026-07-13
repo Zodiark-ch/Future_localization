@@ -12,11 +12,10 @@ def parse_args():
     """
     parser = argparse.ArgumentParser(description="Mask generation tool")
     #safe_mask会兼容conflict_node和false_node，而conflict_mask只会兼容conflict_node，所以单技能只用加载conflict_mask就行
-    # mask path参数
     parser.add_argument(
         "-mask", "--mask_path", 
         type=str, 
-        default="/home/chenhang/CSAT/wanda/zephyr/with_0.0.pt",
+        required=True,
         help="Path to the mask pt file"
     )
     
@@ -24,7 +23,7 @@ def parse_args():
     parser.add_argument(
         "-conflict", "--conflict_node", 
         type=str, 
-        default="/ssd_users/chenhang/CSAT/Edge-Pruning/data/masks/ioi_graph_epoch0_edges_bool_nodes_only.json",
+        required=True,
         help="Path to the conflict node list JSON file"
     )
     
@@ -32,7 +31,7 @@ def parse_args():
     parser.add_argument(
         "-false", "--false_node", 
         type=str, 
-        default="/ssd_users/chenhang/CSAT/Edge-Pruning/data/masks/false_node_list_cyber_winogrande_sst2_bool_ioi_gp.json",
+        required=True,
         help="Path to the false node list JSON file"
     )
     
@@ -40,17 +39,11 @@ def parse_args():
     parser.add_argument(
         "-output", "--output", 
         type=str, 
-        default="/home/chenhang/CSAT/conflict",
-        help="Output directory path (if empty, uses mask path directory)"
+        required=True,
+        help="Output directory path"
     )
     
-    args = parser.parse_args()
-    
-    # 如果output为空，设置为mask path所在的文件夹
-    if not args.output:
-        args.output = os.path.dirname(args.mask_path)
-    
-    return args
+    return parser.parse_args()
 
 def load_mask_file(mask_path):
     """

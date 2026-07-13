@@ -21,8 +21,8 @@ def parse_args():
     
     parser.add_argument("--start-century", "-s", type=int, default=10)
     parser.add_argument("--end-century", "-e", type=int, default=21)
-    parser.add_argument("--nouns", "-n", default="data/helper_files/nouns.txt")
-    parser.add_argument("--out-path", "-o", default="data/datasets/gt/")
+    parser.add_argument("--nouns", "-n", required=True)
+    parser.add_argument("--out-path", "-o", required=True)
     parser.add_argument("--tokenizer", "-t", default="gpt2")
     parser.add_argument("--use-only-original-template", "-u", action="store_true")
     parser.add_argument("--train", "-tr", default=150)

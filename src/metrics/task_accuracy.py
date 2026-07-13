@@ -180,7 +180,7 @@ def eval_task_accuracy(model_name, task_dataset, output_dir=".", batch_size=8, d
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
         torch_dtype=torch.bfloat16 if torch.cuda.is_available() else torch.float32,
-        cache_dir="./.cache",
+        cache_dir=None,
         low_cpu_mem_usage=True,
         device_map={"": 0} if torch.cuda.is_available() else "cpu",
     )

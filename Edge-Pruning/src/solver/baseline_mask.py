@@ -16,28 +16,23 @@ def parse_args():
     parser.add_argument(
         "-mask1", "--mask_path1", 
         type=str, 
-        default="/data/zodiark/CSAT/wanda/zephyr/with_0.9.pt",
+        required=True,
         help="Path to the mask pt file"
     )
     
     parser.add_argument(
         "-mask2", "--mask_path2", 
         type=str, 
-        default="/data/zodiark/CSAT/wanda/zephyr/with_0.9.pt",
+        required=True,
         help="Path to the mask pt file"
     )
     parser.add_argument(
         "-output", "--output", 
         type=str, 
-        default="/data/zodiark/CSAT/conflict",
-        help="Output directory path (if empty, uses mask path directory)"
+        required=True,
+        help="Output directory path"
     )
-    args = parser.parse_args()
-    
-    # 如果output为空，设置为mask path所在的文件夹
-    if not args.output:
-        args.output = os.path.dirname(args.mask_path)
-    return args
+    return parser.parse_args()
 
 
 def load_mask_file(mask_path):

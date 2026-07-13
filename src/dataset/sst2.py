@@ -20,7 +20,7 @@ class SST2(BaseDataset):
         train_dataset = load_dataset(
             "stanfordnlp/sst2",
             split="train",
-            cache_dir="./.cache/data",
+            cache_dir=None,
         )
 
         dataset["train"] = train_dataset
@@ -28,7 +28,7 @@ class SST2(BaseDataset):
         dataset["test"] = load_dataset(
             "stanfordnlp/sst2",
             split="validation",
-            cache_dir="./.cache/data",
+            cache_dir=None,
         )
 
         return dataset

@@ -7,7 +7,7 @@ from matplotlib.ticker import PercentFormatter
 
 # Set up argparse to accept command line arguments for the mask file paths
 parser = argparse.ArgumentParser(description="Compare two model masks for similarity.")
-parser.add_argument("--mask_dir", type=str, help="Path to the joint mask file.")
+parser.add_argument("--mask_dir", type=str, required=True, help="Mask directory")
 parser.add_argument("--max_score", type=float, default=1.0, help="Maximum score")
 args = parser.parse_args()
 

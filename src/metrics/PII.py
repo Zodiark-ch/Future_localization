@@ -50,7 +50,7 @@ def eval_context_extraction(model, tokenizer, if_llama=False, batch_size=8):
         "json",
         data_files="files/data/PII/context.jsonl",
         split="train",
-        cache_dir="./.cache",
+        cache_dir=None,
     )
 
     correct = 0
@@ -114,25 +114,25 @@ def eval_few_shots_extraction(model, tokenizer, if_llama=False, batch_size=8):
         "json",
         data_files="files/data/PII/one_shot_non_domain.jsonl",
         split="train",
-        cache_dir="./.cache",
+        cache_dir=None,
     )
     one_shot = load_dataset(
         "json",
         data_files="files/data/PII/one_shot.jsonl",
         split="train",
-        cache_dir="./.cache",
+        cache_dir=None,
     )
     two_shot = load_dataset(
         "json",
         data_files="files/data/PII/two_shot.jsonl",
         split="train",
-        cache_dir="./.cache",
+        cache_dir=None,
     )
     two_shot_non_domain = load_dataset(
         "json",
         data_files="files/data/PII/two_shot_non_domain.jsonl",
         split="train",
-        cache_dir="./.cache",
+        cache_dir=None,
     )
     email2name = {}
     with open("files/data/PII/email2name.jsonl") as f:
@@ -324,7 +324,7 @@ def eval_PII(model_name, output_dir=".", batch_size=8):
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
         torch_dtype=torch.float16,
-        cache_dir="./.cache",
+        cache_dir=None,
         low_cpu_mem_usage=True,
         device_map="auto",
     )

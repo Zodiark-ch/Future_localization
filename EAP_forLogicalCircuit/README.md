@@ -4,7 +4,7 @@
 
 ## Supported Data
 
-Default CSV lookup first checks `EAP_forLogicalCircuit/data/{dataset}.csv`, then falls back to `EAP_forComponent/data/{dataset}.csv` when available. Supported dataset names include:
+When `--data_path` is omitted, the loader selects a packaged CSV for the requested dataset. Supported dataset names include:
 
 - `bool`
 - `gender`

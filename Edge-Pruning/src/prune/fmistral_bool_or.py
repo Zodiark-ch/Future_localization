@@ -220,8 +220,8 @@ class FMistralInfoTrainer(Seq2SeqTrainer):
 @dataclass
 class DataTrainingArguments:
     dataset_path: Optional[str] = field(
-        default="./data/dataset/ioi/",
-        metadata={"help": "The path to the directory with the JSON files of the task."},
+        default=None,
+        metadata={"help": "The path to the directory with the JSON files of the task.", "required": True},
     )
     train_split: Optional[str] = field(
         default="train",
@@ -319,6 +319,10 @@ class ModelArguments:
         default=None,
         metadata={"help": "Where do you want to store the pretrained models downloaded from huggingface.co"},
     )
+    offload_dir: str = field(
+        default=None,
+        metadata={"help": "Directory for model offloading.", "required": True},
+    )
     model_revision: str = field(
         default="main",
         metadata={"help": "The specific model version to use (can be a branch name, tag name or commit id)."},
@@ -353,8 +357,8 @@ class ModelArguments:
         metadata={"help": "Will enable to load a pretrained model whose head dimensions are different."},
     )
     initialize_from: str = field(
-        default="HuggingFaceH4/zephyr-7b-beta",
-        metadata={"help": "The model to initialize from."},
+        default=None,
+        metadata={"help": "The model to initialize from.", "required": True},
     )
 
 def format_instance(instance, split):
@@ -638,15 +642,15 @@ def main():
         disable_linear_regularization_term=data_args.disable_linear_reg_term,
         device_map=device_map,
         torch_dtype=torch.float32,  # 使用float32避免半精度问题
-        offload_folder="./offload",  # 设置模型卸载目录
+        offload_folder=model_args.offload_dir,
     )
     mistral_model = FMistralForCausalLM.from_pretrained(
         "HuggingFaceH4/zephyr-7b-beta",
         with_embedding_nodes=True,
-        cache_dir='/data/zodiark/CSAT/.cache',
+        cache_dir=model_args.cache_dir,
         device_map=device_map,
         torch_dtype=torch.float32,  # 使用float32避免半精度问题
-        offload_folder="./offload",  # 设置模型卸载目录
+        offload_folder=model_args.offload_dir,
     )
     
     # 冻结mistral_model的所有参数

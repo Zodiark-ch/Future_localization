@@ -1,8 +1,10 @@
 import sys
+from pathlib import Path
 
 from transformers import AutoModelForCausalLM, AutoTokenizer, Trainer, TrainingArguments
 
-sys.path.append("src")
+SRC_ROOT = Path(__file__).resolve().parents[1]
+sys.path.append(str(SRC_ROOT))
 import argparse
 import random
 
@@ -16,9 +18,7 @@ from dataset.HorryPotter import HP
 def args_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument("--model_name", type=str, required=True, help="Model name")
-    parser.add_argument(
-        "--cache_dir", type=str, default=".cache", help="Cache directory"
-    )
+    parser.add_argument("--cache_dir", type=str, help="Optional cache directory")
     parser.add_argument("--seed", type=int, default=0, help="Random seed")
     parser.add_argument(
         "--epochs", type=int, default=10, help="Number of epochs to train"
@@ -28,9 +28,7 @@ def args_parser():
         "--num_warmup_steps", type=int, default=0, help="Number of warmup steps"
     )
     parser.add_argument("--batch_size", type=int, default=4, help="Batch size")
-    parser.add_argument(
-        "--save_dir", type=str, default="files/models/hp", help="Save dir"
-    )
+    parser.add_argument("--save_dir", type=str, required=True, help="Save directory")
     args = parser.parse_args()
     return args
 
@@ -61,7 +59,7 @@ def main():
         learning_rate=args.lr,
         num_train_epochs=args.epochs,
         weight_decay=0.01,
-        logging_dir="logs",
+        logging_dir=str(Path(args.save_dir) / "logs"),
         logging_steps=10,
         save_steps=10,
         evaluation_strategy="steps",

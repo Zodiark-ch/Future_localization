@@ -15,9 +15,9 @@ os.environ["TORCH_USE_CUDA_DSA"] = "1"
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
 Section("overall", "Overall configs").params(
-    model_name=Param(str, required=True, default="mistralai/Mistral-7B-v0.1", desc="Model name"),
+    model_name=Param(str, required=True, desc="Model name"),
     logger=Param(OneOf(["json", "none"]), default="json", desc="Logger to use"),
-    cache_dir=Param(Folder(True), default="/home/chenhang/CSAT/.cache", desc="Cache directory"),
+    cache_dir=Param(str, default=None, desc="Optional cache directory"),
     seed=Param(int, default=0, desc="Random seed"),
     use_cpu=Param(
         BoolAsInt(),
@@ -70,10 +70,8 @@ Section("unlearn", "Unlearning configs").params(
         default="FT",
         desc="Conflict unlearning method",
     ),
-    safe_mask_path=Param(str, default="/home/chenhang/CSAT/wanda/zephyr/with_0.0.pt", desc="Path to safe mask file"),
-    #/home/chenhang/CSAT/conflict/safe_mask.pt     /home/chenhang/CSAT/conflict/conflict_mask.pt
-    conflict_mask_path=Param(str, default="/home/chenhang/CSAT/wanda/zephyr/with_0.0.pt", desc="Path to conflict mask file"),
-    #/home/chenhang/CSAT/wanda/zephyr/with_0.9.pt
+    safe_mask_path=Param(str, default=None, desc="Path to safe mask file"),
+    conflict_mask_path=Param(str, default=None, desc="Path to conflict mask file"),
     alternate_frequency=Param(int, default=1, desc="Alternate frequency (epochs per switch)"),
 
     num_epochs=Param(int, default=6, desc="Number of epochs to train"),
@@ -169,7 +167,7 @@ Section("logger", "General logger configs").params(
 Section("logger.json", "JSON logger").enable_if(
     lambda cfg: cfg["overall.logger"] == "json"
 ).params(
-    root=Param(Folder(True), default="/home/chenhang/CSAT/files/logs", desc="Path to log folder"),
+    root=Param(Folder(True), required=True, desc="Path to log folder"),
 )
 
 

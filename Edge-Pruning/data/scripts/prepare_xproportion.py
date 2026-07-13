@@ -1,4 +1,5 @@
 from datasets import Dataset
+import argparse
 import random
 import json
 
@@ -39,8 +40,11 @@ def random_permutation_with_no_fixed_points(l, all_tokens):
     return l
         
 
-out_path = "data/datasets/xproportion-t{}-s{}".format(len(all_tokens), seq_len)
 bos = "BOS"
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--out_path", required=True)
+args = parser.parse_args()
 
 data = []
 
@@ -84,4 +88,4 @@ print(f"{len(data)} examples")
 print(data[0])
 
 data = Dataset.from_list(data)
-data.save_to_disk(out_path)
+data.save_to_disk(args.out_path)

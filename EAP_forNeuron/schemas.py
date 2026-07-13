@@ -17,9 +17,6 @@ DEFAULT_TARGET_MODULES = (
     "down_proj",
 )
 
-DEFAULT_CACHE_DIR = "/home/chenhang/CSAT/.cache"
-
-
 @dataclass
 class PairExample:
     clean: str
@@ -85,7 +82,7 @@ class ScoreShard:
 
 @dataclass
 class EAPNeuronConfig:
-    model_name_or_path: str = "mistralai/Mistral-7B-v0.1"
+    model_name_or_path: str | None = None
     tokenizer_name_or_path: str | None = None
     mask_path: str | None = None
     output_dir: str | None = None
@@ -108,7 +105,7 @@ class EAPNeuronConfig:
     device: str = "cuda:0"
     use_bfloat16: bool = True
     use_cpu: bool = False
-    cache_dir: str | None = DEFAULT_CACHE_DIR
+    cache_dir: str | None = None
     save_scores: bool = False
     row_chunk_size: int = 256
     max_concat_candidates: int = 50_000_000

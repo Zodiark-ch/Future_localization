@@ -2,14 +2,14 @@
     "overall": {
         "model_name": "HuggingFaceH4/zephyr-7b-beta",
         "logger": "json",
-        "cache_dir": "/data/zodiark/CSAT/.cache",
+        "cache_dir": null,
         "seed": 0
     },
     "unlearn": {
         "safe_unlearn_method": "GA",
         "conflict_unlearn_method": "GA+FT",
-        "safe_mask_path": "/data/zodiark/CSAT/conflict/safe_mask.pt",
-        "conflict_mask_path": "/data/zodiark/CSAT/conflict/conflict_mask.pt",
+        "safe_mask_path": null,
+        "conflict_mask_path": null,
         "alternate_frequency": 1,
         "num_epochs": 6,
         "lr": 1e-06,
@@ -41,7 +41,7 @@
     },
     "logger": {
         "json": {
-            "root": "/data/zodiark/CSAT/files/logs/conflict_stable"
+            "root": null
         }
     }
 }

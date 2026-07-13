@@ -40,14 +40,14 @@ def load_avg_activations(model, path, device):
 def parse_args():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--model_name_or_path", "-m", default="data/runs/example/")
+    parser.add_argument("--model_name_or_path", "-m", required=True)
     parser.add_argument("--with-embedding-nodes", "-w", action="store_true") # TRUE if the run allowed removing embedding nodes
                                                                              # Here WITH means that masks were modeled over embedding nodes
     
     parser.add_argument("--sparsity-edge", "-se", default=None, type=float) # If you want to override the sparsity of the model
     parser.add_argument("--sparsity-node", "-sn", default=None, type=float) # If you want to override the sparsity of the model
     parser.add_argument("--split", "-s", default="test")
-    parser.add_argument("--data-path", "-d", default="./data/datasets/ioi/")
+    parser.add_argument("--data-path", "-d", required=True)
     parser.add_argument("--num-examples", "-n", default=1000000, type=int)
 
     parser.add_argument("--device", "-D", default=("cuda" if torch.cuda.is_available() else "cpu"))

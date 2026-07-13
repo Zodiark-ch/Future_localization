@@ -8,12 +8,6 @@ from pathlib import Path
 import torch
 from datasets import load_dataset
 from transformers import AutoModelForCausalLM, AutoTokenizer
-
-
-DEFAULT_OUTPUTS = (
-    "EAP_forComponent/data/sst2.csv",
-    "EAP_forLogicalCircuit/data/sst2.csv",
-)
 CLEAN_PREFIX = "<s> Is the sentiment of following sentence positive or negative?"
 CORRUPTED_PREFIX = "<s> Is the sentiment of following sentence exist or none?"
 ANSWER_SUFFIX = "\nAnswer: It is"
@@ -21,12 +15,12 @@ ANSWER_SUFFIX = "\nAnswer: It is"
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Build balanced SST2 CSV files for EAP pair attribution.")
-    parser.add_argument("--model_name_or_path", default="mistralai/Mistral-7B-v0.1")
-    parser.add_argument("--tokenizer_name_or_path", default=None)
-    parser.add_argument("--cache_dir", default="/home/chenhang/CSAT/.cache")
-    parser.add_argument("--dataset_cache_dir", default="./.cache/data")
+    parser.add_argument("--model_name_or_path", required=True)
+    parser.add_argument("--tokenizer_name_or_path")
+    parser.add_argument("--cache_dir")
+    parser.add_argument("--dataset_cache_dir")
     parser.add_argument("--split", default="train")
-    parser.add_argument("--output_paths", default=",".join(DEFAULT_OUTPUTS))
+    parser.add_argument("--output_paths", required=True)
     parser.add_argument("--examples_per_label", type=int, default=500)
     parser.add_argument("--batch_size", type=int, default=16)
     parser.add_argument("--seed", type=int, default=0)

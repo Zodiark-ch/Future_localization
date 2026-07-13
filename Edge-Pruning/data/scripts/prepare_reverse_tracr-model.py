@@ -44,7 +44,7 @@ def flatten_dict(x):
 def parse_args():
     parser = argparse.ArgumentParser()
     
-    parser.add_argument("--out_path", type=str, default="data/tracr_models/d-reverse.tracr.pkl")
+    parser.add_argument("--out_path", type=str, required=True)
     parser.add_argument("--max_seq_len", type=int, default=5)
     parser.add_argument("--bos", type=str, default="BOS")
     parser.add_argument("--vocab-len", type=int, default=3)

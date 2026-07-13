@@ -20,13 +20,13 @@ class WMDPCyber(BaseDataset):
     def get_dataset(self):
         if self.subset == "retain":
             train_dataset = load_dataset(
-                "cais/wmdp-corpora", "cyber-retain-corpus", cache_dir="./.cache"
+                "cais/wmdp-corpora", "cyber-retain-corpus", cache_dir=None
             )["train"]
         else:
             train_dataset = load_dataset(
-                "cais/wmdp-corpora", "cyber-forget-corpus", cache_dir="./.cache"
+                "cais/wmdp-corpora", "cyber-forget-corpus", cache_dir=None
             )["train"]
-        test_dataset = load_dataset("cais/wmdp", "wmdp-cyber", cache_dir="./.cache")[
+        test_dataset = load_dataset("cais/wmdp", "wmdp-cyber", cache_dir=None)[
             "test"
         ]
 
@@ -144,13 +144,13 @@ class WMDPBio(BaseDataset):
     def get_dataset(self):
         if self.subset == "retain":
             train_dataset = load_dataset(
-                "cais/wmdp-corpora", "bio-retain-corpus", cache_dir="./.cache"
+                "cais/wmdp-corpora", "bio-retain-corpus", cache_dir=None
             )["train"]
         else:
             train_dataset = load_dataset(
-                "cais/wmdp-bio-forget-corpus", cache_dir="./.cache"
+                "cais/wmdp-bio-forget-corpus", cache_dir=None
             )["train"]
-        test_dataset = load_dataset("cais/wmdp", "wmdp-bio", cache_dir="./.cache")[
+        test_dataset = load_dataset("cais/wmdp", "wmdp-bio", cache_dir=None)[
             "test"
         ]
 
@@ -266,11 +266,11 @@ class WMDPALL(BaseDataset):
     def get_dataset(self):
         if self.subset == "retain":
             train_dataset_cyber = load_dataset(
-                "cais/wmdp-corpora", "cyber-retain-corpus", cache_dir="./.cache"
+                "cais/wmdp-corpora", "cyber-retain-corpus", cache_dir=None
             )["train"]
 
             train_dataset_bio = load_dataset(
-                "cais/wmdp-bio-forget-corpus", cache_dir="./.cache"
+                "cais/wmdp-bio-forget-corpus", cache_dir=None
             )["train"]
 
 
@@ -278,16 +278,16 @@ class WMDPALL(BaseDataset):
             train_dataset = concatenate_datasets([train_dataset_cyber, train_dataset_bio])
         else:
             train_dataset_cyber = load_dataset(
-                "cais/wmdp-corpora", "cyber-forget-corpus", cache_dir="./.cache"
+                "cais/wmdp-corpora", "cyber-forget-corpus", cache_dir=None
             )["train"]
             train_dataset_bio = load_dataset(
-                "cais/wmdp-bio-forget-corpus", cache_dir="./.cache"
+                "cais/wmdp-bio-forget-corpus", cache_dir=None
             )["train"]
             train_dataset = concatenate_datasets([train_dataset_cyber, train_dataset_bio])
-        test_dataset_bio = load_dataset("cais/wmdp", "wmdp-bio", cache_dir="./.cache")[
+        test_dataset_bio = load_dataset("cais/wmdp", "wmdp-bio", cache_dir=None)[
             "test"
         ]
-        test_dataset_cyber = load_dataset("cais/wmdp", "wmdp-cyber", cache_dir="./.cache")[
+        test_dataset_cyber = load_dataset("cais/wmdp", "wmdp-cyber", cache_dir=None)[
             "test"
         ]
         test_dataset = concatenate_datasets([test_dataset_bio, test_dataset_cyber])

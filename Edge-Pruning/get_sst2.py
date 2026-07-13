@@ -5,6 +5,7 @@ WMDP数据集加载和处理脚本
 用于重新处理WMDP数据集，特别是cyber子集
 """
 
+import argparse
 import os
 import sys
 import torch
@@ -14,7 +15,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "3"
 def load_wmdp_dataset(
     dataset_name: str = "stanfordnlp/sst2",
     split: str = "train",
-    cache_dir: str = "./.cache"
+    cache_dir: Optional[str] = None,
 ) -> Any:
     """
     加载WMDP数据集
@@ -23,7 +24,7 @@ def load_wmdp_dataset(
         dataset_name: 数据集名称，默认为 "cais/wmdp"
         subset: 数据集子集，默认为 "wmdp-cyber"
         split: 数据集分割，默认为 "test"
-        cache_dir: 缓存目录，默认为 "./.cache"
+        cache_dir: 可选缓存目录
     
     Returns:
         加载的数据集
@@ -31,8 +32,8 @@ def load_wmdp_dataset(
     try:
         print(f"正在加载数据集: {dataset_name}, 分割: {split}")
         
-        # 确保缓存目录存在
-        os.makedirs(cache_dir, exist_ok=True)
+        if cache_dir:
+            os.makedirs(cache_dir, exist_ok=True)
         
         # 加载数据集
         dataset = load_dataset(
@@ -113,7 +114,12 @@ def load_dataset_from_disk(
         print(f"从本地加载数据集时发生错误: {e}")
         raise
 
-def process_wmdp_dataset(dataset: Any, max_tokens: int = 5000) -> Any:
+def process_wmdp_dataset(
+    dataset: Any,
+    tokenizer_name_or_path: str,
+    max_tokens: int = 5000,
+    cache_dir: Optional[str] = None,
+) -> Any:
     """
     处理WMDP数据集，添加新的元信息，并过滤掉token长度超过限制的样本
     
@@ -129,7 +135,7 @@ def process_wmdp_dataset(dataset: Any, max_tokens: int = 5000) -> Any:
     
     # 加载tokenizer用于检查token长度
     from transformers import AutoTokenizer
-    tokenizer = AutoTokenizer.from_pretrained("HuggingFaceH4/zephyr-7b-beta")
+    tokenizer = AutoTokenizer.from_pretrained(tokenizer_name_or_path, cache_dir=cache_dir)
     print(f"使用tokenizer检查token长度，最大限制: {max_tokens}")
     
     def process_sample(sample):
@@ -193,7 +199,13 @@ def process_wmdp_dataset(dataset: Any, max_tokens: int = 5000) -> Any:
     
     return processed_dataset
 
-def validate_samples_with_llm(dataset: Any, num_samples: int = None) -> Any:
+def validate_samples_with_llm(
+    dataset: Any,
+    model_name_or_path: str,
+    output_dir: str,
+    num_samples: int = None,
+    cache_dir: Optional[str] = None,
+) -> Any:
     """
     使用LLM验证数据集样本的输入是否正确，并统计准确率
     
@@ -210,8 +222,8 @@ def validate_samples_with_llm(dataset: Any, num_samples: int = None) -> Any:
         from transformers import AutoTokenizer
         
         # 加载模型和tokenizer
-        model = MistralForCausalLM.from_pretrained("HuggingFaceH4/zephyr-7b-beta")
-        tokenizer = AutoTokenizer.from_pretrained("HuggingFaceH4/zephyr-7b-beta")
+        model = MistralForCausalLM.from_pretrained(model_name_or_path, cache_dir=cache_dir)
+        tokenizer = AutoTokenizer.from_pretrained(model_name_or_path, cache_dir=cache_dir)
         tokenizer.pad_token = tokenizer.eos_token
         
         # 将模型移到GPU（如果可用）
@@ -414,11 +426,9 @@ def validate_samples_with_llm(dataset: Any, num_samples: int = None) -> Any:
                 from datasets import Dataset
                 correct_dataset = Dataset.from_list(correct_samples)
                 
-                # 保存到本地
-                save_path = "./data/datasets/sst2"
-                correct_dataset.save_to_disk(save_path)
+                correct_dataset.save_to_disk(output_dir)
                 
-                print(f"\n💾 正确预测样本数据集已保存到: {save_path}")
+                print(f"\n💾 正确预测样本数据集已保存到: {output_dir}")
                 print(f"   数据集大小: {len(correct_dataset)} 个样本")
                 print(f"   数据集特征: {correct_dataset.features}")
                 
@@ -462,12 +472,19 @@ def main():
     """
     主函数
     """
+    parser = argparse.ArgumentParser(description="Build the SST-2 dataset used by Edge-Pruning.")
+    parser.add_argument("--output_dir", required=True)
+    parser.add_argument("--model_name_or_path", required=True)
+    parser.add_argument("--tokenizer_name_or_path", required=True)
+    parser.add_argument("--cache_dir")
+    args = parser.parse_args()
+
     try:
         # 加载WMDP cyber数据集
         print("="*50)
         print("加载WMDP cyber数据集")
         print("="*50)
-        dataset = load_wmdp_dataset()
+        dataset = load_wmdp_dataset(cache_dir=args.cache_dir)
         
         # 加载WMDP bio数据集用于生成choiceE
         print("\n" + "="*50)
@@ -482,7 +499,12 @@ def main():
         print("\n" + "="*50)
         print("处理数据集，添加新的元信息")
         print("="*50)
-        processed_dataset = process_wmdp_dataset(dataset, max_tokens=5000)
+        processed_dataset = process_wmdp_dataset(
+            dataset,
+            args.tokenizer_name_or_path,
+            max_tokens=5000,
+            cache_dir=args.cache_dir,
+        )
         
         # 探索处理后的数据集
         print("\n" + "="*50)
@@ -494,7 +516,13 @@ def main():
         print("\n" + "="*50)
         print("使用LLM验证样本")
         print("="*50)
-        processed_dataset = validate_samples_with_llm(processed_dataset, num_samples=None)  # 验证所有样本
+        processed_dataset = validate_samples_with_llm(
+            processed_dataset,
+            args.model_name_or_path,
+            args.output_dir,
+            num_samples=None,
+            cache_dir=args.cache_dir,
+        )
         
         # # 处理正确预测的数据集
         # if correct_dataset is not None:
@@ -532,7 +560,7 @@ def main():
         
         # 创建主数据集文件夹
         import os
-        main_dataset_path = "./Edge-Pruning/data/datasets/sst2"
+        main_dataset_path = args.output_dir
         os.makedirs(main_dataset_path, exist_ok=True)
         
         # 保存训练集到train子文件夹
@@ -556,7 +584,7 @@ def main():
         print("="*50)
         
         # 加载训练集
-        train_path = "./Edge-Pruning/data/datasets/sst2/train"
+        train_path = os.path.join(main_dataset_path, "train")
         if os.path.exists(train_path):
             from datasets import load_from_disk
             local_train_dataset = load_from_disk(train_path)
@@ -566,7 +594,7 @@ def main():
             local_train_dataset = None
         
         # 加载验证集
-        validation_path = "./Edge-Pruning/data/datasets/sst2/validation"
+        validation_path = os.path.join(main_dataset_path, "validation")
         if os.path.exists(validation_path):
             local_validation_dataset = load_from_disk(validation_path)
             print(f"验证集加载成功！共包含 {len(local_validation_dataset)} 个样本")
@@ -581,7 +609,10 @@ def main():
         
         # 加载tokenizer
         from transformers import AutoTokenizer
-        tokenizer = AutoTokenizer.from_pretrained("HuggingFaceH4/zephyr-7b-beta")
+        tokenizer = AutoTokenizer.from_pretrained(
+            args.tokenizer_name_or_path,
+            cache_dir=args.cache_dir,
+        )
         print("Tokenizer加载成功")
         
         def analyze_token_lengths(dataset, dataset_name):

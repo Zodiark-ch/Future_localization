@@ -14,7 +14,7 @@ from modeling_fmistral import FMistralForCausalLM
 def parse_args():
     parser = argparse.ArgumentParser()
     
-    parser.add_argument("-m1", "--model1", type=str, default="/data/zodiark/CSAT/files/runs/winogrande_or/")
+    parser.add_argument("-m1", "--model1", type=str, required=True)
     parser.add_argument("-m2", "--model2", type=str, default="")
     parser.add_argument("-w", "--with_embedding_nodes", action="store_true", default=True)
     parser.add_argument("-o", "--output", type=str, default="")

@@ -78,12 +78,12 @@ SUBJECTS = {}
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--base_yaml_path", default="_default_template_yaml")
-    parser.add_argument("--save_prefix_path", default="tmlu")
+    parser.add_argument("--base_yaml_path", required=True)
+    parser.add_argument("--save_prefix_path", required=True)
     parser.add_argument("--cot_prompt_path", default=None)
     parser.add_argument("--task_prefix", default="")
     parser.add_argument("--group_prefix", default="")
-    parser.add_argument("--subject_file", default="../subject.tsv")
+    parser.add_argument("--subject_file", required=True)
     return parser.parse_args()
 
 

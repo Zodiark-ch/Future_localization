@@ -24,7 +24,7 @@ def bad(text):
 def parse_args():
     parser = argparse.ArgumentParser()
     
-    parser.add_argument("--out-path", "-o", default="data/datasets/boolean_expressions")
+    parser.add_argument("--out-path", "-o", required=True)
     parser.add_argument("--num-examples", "-n", type=int, default=10000)
     parser.add_argument("--val-ratio", "-v", type=float, default=0.1)
     parser.add_argument("--test-ratio", "-t", type=float, default=0.4)

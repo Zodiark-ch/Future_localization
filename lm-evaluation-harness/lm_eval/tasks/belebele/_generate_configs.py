@@ -18,7 +18,7 @@ API_URL = "https://datasets-server.huggingface.co/splits?dataset=facebook/belebe
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--base_yaml_path", required=True)
-    parser.add_argument("--save_prefix_path", default="belebele")
+    parser.add_argument("--save_prefix_path", required=True)
     parser.add_argument("--cot_prompt_path", default=None)
     parser.add_argument("--task_prefix", default="")
     return parser.parse_args()

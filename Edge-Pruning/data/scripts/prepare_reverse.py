@@ -1,12 +1,16 @@
 from datasets import Dataset
+import argparse
 import random
 import json
 
 num_tokens = 3
 seq_len = 3
 max_examples = 10000
-out_path = "data/datasets/reverse-t{}-s{}".format(num_tokens, seq_len)
 bos = "BOS"
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--out_path", required=True)
+args = parser.parse_args()
 
 def should_use_sampling(num_tokens, seq_len, max_examples):
     while max_examples > 1:
@@ -68,4 +72,4 @@ for i in range(len(data)):
     data[i]["corr_seq"] = stringify(data[i]["corr_seq"])
     
 data = Dataset.from_list(data)
-data.save_to_disk(out_path)
+data.save_to_disk(args.out_path)

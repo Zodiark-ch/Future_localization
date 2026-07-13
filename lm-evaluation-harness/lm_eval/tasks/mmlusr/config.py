@@ -90,7 +90,7 @@ def parse_args():
     # Directory where the generated YAML files will be saved
     parser.add_argument(
         "--save_dir",
-        default="/data/local/cat/lm-evaluation-harness/lm_eval/tasks/mmlusr/question_and_answer",
+        required=True,
     )
 
     # Optional prefix to add to task names in the YAML files

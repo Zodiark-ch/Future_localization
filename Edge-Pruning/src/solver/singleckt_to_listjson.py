@@ -9,12 +9,6 @@ import argparse
 import json
 import os
 
-# --- 默认路径（可直接改下面两行；不传 -i / -o 时使用）---
-_EDGE_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-DEFAULT_CIRCUIT_JSON = os.path.join(_EDGE_ROOT, "data", "/home/lthpc/hangc/EAP-IG/ioi_graph_epoch0_edges_bool.json")
-DEFAULT_OUTPUT_JSON = os.path.join(_EDGE_ROOT, "data", "masks", "ioi_graph_epoch0_edges_bool_nodes_only.json")
-
-
 def parse_args():
     parser = argparse.ArgumentParser(
         description="从 circuit JSON 提取节点列表并保存为 JSON 数组"
@@ -23,15 +17,15 @@ def parse_args():
         "-i",
         "--circuit",
         type=str,
-        default=DEFAULT_CIRCUIT_JSON,
-        help=f"circuit JSON 文件路径（默认: {DEFAULT_CIRCUIT_JSON}）",
+        required=True,
+        help="circuit JSON 文件路径",
     )
     parser.add_argument(
         "-o",
         "--output",
         type=str,
-        default=DEFAULT_OUTPUT_JSON,
-        help=f"输出 JSON 文件路径（默认: {DEFAULT_OUTPUT_JSON}）",
+        required=True,
+        help="输出 JSON 文件路径",
     )
     return parser.parse_args()
 

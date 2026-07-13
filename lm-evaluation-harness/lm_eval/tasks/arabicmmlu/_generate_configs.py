@@ -59,8 +59,8 @@ SUBJECTS = {
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--base_yaml_path", default="_default_arabicmmlu_template_yaml")
-    parser.add_argument("--save_prefix_path", default="arabicmmlu")
+    parser.add_argument("--base_yaml_path", required=True)
+    parser.add_argument("--save_prefix_path", required=True)
     return parser.parse_args()
 
 

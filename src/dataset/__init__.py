@@ -1,4 +1,5 @@
 from collections import defaultdict
+from pathlib import Path
 
 import torch
 from transformers import default_data_collator
@@ -24,6 +25,11 @@ from typing import (
     Any,
     Optional,
 )
+
+
+_TASK_DATA_ROOT = Path(__file__).resolve().parents[2] / "files" / "data"
+
+
 def _single_token_ioi_names(tokenizer):
     valid_names = [
         name for name in NAMES
@@ -547,14 +553,14 @@ def _load_task_dataset(dataset_name, tokenizer, dataset_seed, if_llama=False, ro
             _to_labels_dataset(DocstingDatasetWrapper(raw_prompts[2400:3000], tokenizer)),
         )
     elif dataset_name == "gender":
-        dataset = load_datasets("/ssd_users/chenhang/CSAT/files/data/gp", 3000, 600)
+        dataset = load_datasets(str(_TASK_DATA_ROOT / "gp"), 3000, 600)
         return (
             _to_labels_dataset(GenderDatasetWrapper(dataset["train_3k"], tokenizer)),
             _to_labels_dataset(GenderDatasetWrapper(dataset["test"], tokenizer)),
         )
     elif dataset_name == "bool":
         dataset = load_datasets(
-            "/ssd_users/chenhang/CSAT/files/data/boolean_expressions", 3000, 600
+            str(_TASK_DATA_ROOT / "boolean_expressions"), 3000, 600
         )
         return (
             _to_labels_dataset(BoolDatasetWrapper(dataset["train"], tokenizer)),
@@ -791,13 +797,13 @@ def get_dataset(
             retain_datasets[f"retain{i+1}"] = DocstingDatasetWrapper(validation_data, tokenizer)
             test_datasets[f"test{i+1}"] = DocstingDatasetWrapper(test_data, tokenizer)
         elif retain_name == "gender":
-            dataset=load_datasets("/ssd_users/chenhang/CSAT/files/data/gp", 3000, 600)
+            dataset=load_datasets(str(_TASK_DATA_ROOT / "gp"), 3000, 600)
             validation_data=dataset["train_3k"]
             test_data=dataset["test"]
             retain_datasets[f"retain{i+1}"] = GenderDatasetWrapper(validation_data, tokenizer)
             test_datasets[f"test{i+1}"] = GenderDatasetWrapper(test_data, tokenizer)
         elif retain_name == "bool":
-            dataset=load_datasets("/ssd_users/chenhang/CSAT/files/data/boolean_expressions", 3000, 600)
+            dataset=load_datasets(str(_TASK_DATA_ROOT / "boolean_expressions"), 3000, 600)
             validation_data=dataset["train"]
             test_data=dataset["test"]
             retain_datasets[f"retain{i+1}"] = BoolDatasetWrapper(validation_data, tokenizer)
@@ -850,11 +856,11 @@ def get_dataset(
                 )
                 downstream_datasets[f"downstream_{downstream_name}"] = IOIDatasetWrapper(ioi_dataset_test, tokenizer)
             elif downstream_name == "bool":
-                dataset = load_datasets("/ssd_users/chenhang/CSAT/files/data/boolean_expressions", 3000, 600)
+                dataset = load_datasets(str(_TASK_DATA_ROOT / "boolean_expressions"), 3000, 600)
                 test_data = dataset["test"]
                 downstream_datasets[f"downstream_{downstream_name}"] = BoolDatasetWrapper(test_data, tokenizer)
             elif downstream_name == "gender":
-                dataset = load_datasets("/ssd_users/chenhang/CSAT/files/data/gp", 3000, 600)
+                dataset = load_datasets(str(_TASK_DATA_ROOT / "gp"), 3000, 600)
                 test_data = dataset["test"]
                 downstream_datasets[f"downstream_{downstream_name}"] = GenderDatasetWrapper(test_data, tokenizer)
             elif downstream_name == "docstring":

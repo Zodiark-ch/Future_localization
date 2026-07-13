@@ -2267,19 +2267,24 @@ class FMistralForCausalLM(FMistralPreTrainedModel, GenerationMixin):
 
 
 if __name__ == '__main__':
+    import argparse
     from transformers import AutoTokenizer
     import torch
 
-    #model = FMistralForCausalLM.from_pretrained("HuggingFaceH4/zephyr-7b-beta")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--model_name_or_path", required=True)
+    parser.add_argument("--offload_dir", required=True)
+    args = parser.parse_args()
+
     model = FMistralForCausalLM.from_pretrained(
-        "HuggingFaceH4/zephyr-7b-beta",
+        args.model_name_or_path,
         with_embedding_nodes=True,
         disable_linear_regularization_term=True,
-        torch_dtype=torch.float32,  # 使用float32避免半精度问题
+        torch_dtype=torch.float32,
         device_map="auto",
-        offload_folder="./offload",  # 设置模型卸载目录
+        offload_folder=args.offload_dir,
     )
-    tokenizer = AutoTokenizer.from_pretrained("HuggingFaceH4/zephyr-7b-beta")
+    tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path)
 
     inputs = tokenizer("Hi, I am John. I", return_tensors="pt", padding=True)
     input_ids = inputs["input_ids"]

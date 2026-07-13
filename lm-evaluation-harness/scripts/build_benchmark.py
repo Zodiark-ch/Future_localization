@@ -18,7 +18,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--benchmark_name", required=True)
     parser.add_argument("--benchmark_path", required=True)
-    parser.add_argument("--task_save_path", default="lm_eval/tasks/")
+    parser.add_argument("--task_save_path", required=True)
     return parser.parse_args()
 
 

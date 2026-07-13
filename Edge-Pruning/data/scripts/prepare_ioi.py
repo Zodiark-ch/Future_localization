@@ -2,7 +2,6 @@ import os
 import json
 import random
 from tqdm import tqdm
-import sys
 import argparse
 
 import numpy as np
@@ -12,7 +11,7 @@ from transformers import AutoTokenizer
 def parse_args():
     parser = argparse.ArgumentParser()
     
-    parser.add_argument("--out-dir", "-o", default="data/datasets/ioi")
+    parser.add_argument("--out-dir", "-o", required=True)
     parser.add_argument("--seed", "-s", type=int, default=42)
     parser.add_argument("--start-size", "-n", type=int, default=300000) # Trim the dataset early to save time
     parser.add_argument("--num_test_templates", "-nt", type=int, default=4) # Number of held-out templates
@@ -20,7 +19,7 @@ def parse_args():
     parser.add_argument("--validation", "-v", type=int, default=200)
     parser.add_argument("--test", "-e", type=int, default=10000)
     parser.add_argument("--tokenizer", "-tk", default="gpt2")
-    parser.add_argument("--names", "-nm", default="data/helper_files/names.json")
+    parser.add_argument("--names", "-nm", required=True)
     
     args = parser.parse_args()
     
@@ -29,8 +28,6 @@ def parse_args():
         args.names = args.names["boys"] + args.names["girls"]
     
     return args
-
-out_dir = "data/ioi" if len(sys.argv) == 1 else sys.argv[1]
 
 baba_templates = [
     "Then, {B} and {A} went to the {PLACE}. {B} gave a {OBJECT} to {A}",
@@ -206,7 +203,7 @@ def main():
     
     # Part 3: Save the datasets
     
-    processed.save_to_disk(out_dir)
+    processed.save_to_disk(args.out_dir)
 
 if __name__ == '__main__':
     main()

@@ -54,7 +54,11 @@ import torch.nn as nn
 from torch.optim import AdamW
 
 import sys
-sys.path.append("/scratch/gpfs/ab4197/p-printer/tracr/tt/")
+from pathlib import Path
+
+modeling_dir = Path(__file__).resolve().parents[1] / "modeling"
+if str(modeling_dir) not in sys.path:
+    sys.path.insert(0, str(modeling_dir))
 from modeling_erazr import ErazrModel, ErazrTokenizer, ErazrConfig, get_config_weights_and_vocab
 
 require_version("datasets>=1.8.0", "To fix: pip install -r examples/pytorch/text-classification/requirements.txt")
@@ -164,8 +168,8 @@ class ErazrTrainer(Seq2SeqTrainer):
 @dataclass
 class DataTrainingArguments:
     dataset_path: Optional[str] = field(
-        default="./data/datasets/xproportion-t4-s4",
-        metadata={"help": "The path to the directory with the JSON files of the task."},
+        default=None,
+        metadata={"help": "The path to the directory with the JSON files of the task.", "required": True},
     )
     max_train_samples: Optional[int] = field(
         default=None,
@@ -293,8 +297,8 @@ class ModelArguments:
         metadata={"help": "Will enable to load a pretrained model whose head dimensions are different."},
     )
     initialize_from: str = field(
-        default="models/reverse.tracr.pkl",
-        metadata={"help": "The model to initialize from."},
+        default=None,
+        metadata={"help": "The model to initialize from.", "required": True},
     )
 
 def format_instance(instance, split):

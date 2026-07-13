@@ -19,7 +19,6 @@ DEFAULT_TARGET_MODULES = (
 
 ATTENTION_MODULES = ("q_proj", "k_proj", "v_proj", "o_proj")
 MLP_MODULES = ("gate_proj", "up_proj", "down_proj")
-DEFAULT_CACHE_DIR = "/home/chenhang/CSAT/.cache"
 
 
 @dataclass
@@ -122,9 +121,9 @@ class ComponentScore:
 
 @dataclass
 class EAPComponentConfig:
-    model_name_or_path: str = "mistralai/Mistral-7B-v0.1"
+    model_name_or_path: str | None = None
     tokenizer_name_or_path: str | None = None
-    output_dir: str = "files/component_scores/ioi_mistral"
+    output_dir: str | None = None
     dataset_name: str = "ioi_mistral"
     data_path: str | None = None
     corruption_column: str = "corrupted"
@@ -162,6 +161,6 @@ class EAPComponentConfig:
     device: str = "cuda:0"
     use_bfloat16: bool = True
     use_cpu: bool = False
-    cache_dir: str | None = DEFAULT_CACHE_DIR
+    cache_dir: str | None = None
     capture_device: str = "cpu"
     metadata: dict[str, Any] = field(default_factory=dict)

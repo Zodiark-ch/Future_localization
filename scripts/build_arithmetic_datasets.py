@@ -30,12 +30,15 @@ EAP_DATA_DIRS = (
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Build merged arithmetic JSON and EAP pair CSV files.")
-    parser.add_argument("--arithmetic_dir", default=str(REPO_ROOT / "data" / "datasets" / "arithmetic"))
-    parser.add_argument("--tokenizer_name_or_path", default="mistralai/Mistral-7B-v0.1")
-    parser.add_argument("--cache_dir", default="/home/chenhang/CSAT/.cache")
+    parser.add_argument("--arithmetic_dir", required=True)
+    parser.add_argument("--tokenizer_name_or_path")
+    parser.add_argument("--cache_dir")
     parser.add_argument("--shuffle_seed", type=int, default=1000)
     parser.add_argument("--skip_csv", action="store_true")
-    return parser.parse_args()
+    args = parser.parse_args()
+    if not args.skip_csv and not args.tokenizer_name_or_path:
+        parser.error("--tokenizer_name_or_path is required unless --skip_csv is set")
+    return args
 
 
 def main() -> None:
@@ -90,7 +93,7 @@ def merge_digit_json(arithmetic_dir: Path, digit: int) -> Path:
     return output_path
 
 
-def load_tokenizer(tokenizer_name_or_path: str, cache_dir: str):
+def load_tokenizer(tokenizer_name_or_path: str, cache_dir: str | None):
     from transformers import AutoTokenizer
 
     return AutoTokenizer.from_pretrained(

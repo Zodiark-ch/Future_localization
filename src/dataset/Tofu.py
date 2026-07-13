@@ -24,7 +24,7 @@ class ToFU(BaseDataset):
     def get_dataset(self):
         key = f"{self.subset}"
         train_dataset = load_dataset(
-            "locuslab/TOFU", key, cache_dir="./.cache", split="train"
+            "locuslab/TOFU", key, cache_dir=None, split="train"
         )
         test_key = f"{self.subset}_perturbed"
         if "retain" in self.subset:
@@ -36,7 +36,7 @@ class ToFU(BaseDataset):
         elif "full" in self.subset:
             test_key = f"full"
         test_dataset = load_dataset(
-            "locuslab/TOFU", test_key, cache_dir="./.cache", split="train"
+            "locuslab/TOFU", test_key, cache_dir=None, split="train"
         )
         dataset = defaultdict()
         dataset["train"] = train_dataset
@@ -135,7 +135,7 @@ class ToFU(BaseDataset):
 
     def build_pretrain_dataset(self, tokenizer, subset="full"):
         train_dataset = load_dataset(
-            "locuslab/TOFU", subset, cache_dir="./.cache", split="train"
+            "locuslab/TOFU", subset, cache_dir=None, split="train"
         )
 
         def preprocess_train(examples):

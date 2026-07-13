@@ -34,6 +34,10 @@ class EAPForComponentRunner:
         self.registry: ComponentRegistry | None = None
 
     def run(self) -> dict[str, Path]:
+        if not self.config.model_name_or_path:
+            raise ValueError("model_name_or_path is required")
+        if not self.config.output_dir:
+            raise ValueError("output_dir is required")
         started = time.time()
         self.model, self.tokenizer, self.device = load_model_and_tokenizer(
             model_name_or_path=self.config.model_name_or_path,

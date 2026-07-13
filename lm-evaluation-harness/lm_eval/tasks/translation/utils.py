@@ -107,7 +107,7 @@ def main() -> None:
         help="Overwrite files if they already exist",
     )
     parser.add_argument(
-        "--output-dir", default=".", help="Directory to write yaml files to"
+        "--output-dir", required=True, help="Directory to write yaml files to"
     )
     args = parser.parse_args()
 

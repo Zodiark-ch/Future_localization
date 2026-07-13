@@ -33,10 +33,8 @@ VERSION = 0
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--base_yaml_path", default="_default_arab_culture_completion_template_yaml"
-    )
-    parser.add_argument("--save_prefix_path", default="arab_culture_completion")
+    parser.add_argument("--base_yaml_path", required=True)
+    parser.add_argument("--save_prefix_path", required=True)
     return parser.parse_args()
 
 

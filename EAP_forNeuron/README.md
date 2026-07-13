@@ -38,15 +38,14 @@ The first version supports copied pair CSVs for:
 - `4_digit_arithmetic`
 - `5_digit_arithmetic`
 
-By default the loader reads `EAP_forNeuron/data/{dataset}.csv`.
+When `--data_path` is omitted, the loader selects the packaged CSV for the requested dataset.
 
 Arithmetic CSVs use the multiple-choice prompt from finetuning with deterministically shuffled options as `clean`, replace `the correct option` with `the first option` as `corrupted`, leave `corrupted_hard` empty, store the shuffled correct option-letter token id in `correct_idx`, and use the Mistral token id for `A` as `incorrect_idx`.
 
 ## Example
 
 ```bash
-cd /ssd_users/chenhang/CSAT
-/home/chenhang/.conda/envs/LLMSFT_BW/bin/python -m EAP_forNeuron.cli \
+python -m EAP_forNeuron.cli \
   --model_name_or_path mistralai/Mistral-7B-v0.1 \
   --tokenizer_name_or_path mistralai/Mistral-7B-v0.1 \
   --mask_path files/masks/gradient/IOI/with_0.2.pt \

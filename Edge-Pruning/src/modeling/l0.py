@@ -17,7 +17,7 @@ def cdf_stretched_concrete(x, log_alpha):
     #     log_alpha_safe[torch.isnan(log_alpha_safe)] = 10.0  # 将nan替换为10.0
     #     log_alpha_safe[torch.isinf(log_alpha_safe)] = 10.0  # 将inf替换为10.0
     #     log_alpha = log_alpha_safe
-    
+
     x_01 = (x - LIMIT_LEFT) / (LIMIT_RIGHT - LIMIT_LEFT)
     intermediate = math.log(x_01) - math.log(1 - x_01)
     prob_unclamped = torch.sigmoid(TEMPERATURE * intermediate - log_alpha)

@@ -1088,10 +1088,14 @@ class ErazrModelForSequenceTransformation(ErazrPretrainedModel):
         
 
 if __name__ == '__main__':
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--model_path", required=True)
+    args = parser.parse_args()
     np.set_printoptions(threshold=100000)
 
-    in_path = "data/tracr_models/xproportion.tracr.pkl"
-    config, tok_embed, pos_embed, blocks_embeds, vocab, bos, pad, _ = get_config_weights_and_vocab(in_path)
+    config, tok_embed, pos_embed, blocks_embeds, vocab, bos, pad, _ = get_config_weights_and_vocab(args.model_path)
 
     tokenizer = ErazrTokenizer(vocab, bos, pad)
     model = ErazrModel(config).to("cuda")

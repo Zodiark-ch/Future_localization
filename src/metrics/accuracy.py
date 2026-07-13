@@ -17,7 +17,7 @@ def eval_acc(
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
         torch_dtype=torch.float16,
-        cache_dir="./.cache",
+        cache_dir=None,
         low_cpu_mem_usage=True,
         device_map="auto",
     )
@@ -104,9 +104,13 @@ def eval_acc(
 
 
 if __name__ == "__main__":
+    import argparse
 
     from src.dataset import get_dataset
 
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--output_dir", required=True)
+    args = parser.parse_args()
 
     tokenizer = AutoTokenizer.from_pretrained("gpt2")
     tokenizer.pad_token = tokenizer.eos_token
@@ -124,7 +128,7 @@ if __name__ == "__main__":
     accuracy = eval_acc(
         model_name="gpt2",
         retain_dataset=test_dataset,
-        output_dir="./results",
+        output_dir=args.output_dir,
         batch_size=4
     )
 

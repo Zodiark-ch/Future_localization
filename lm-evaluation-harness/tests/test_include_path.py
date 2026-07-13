@@ -31,7 +31,7 @@ def test_include_correctness(limit: int, model: str, model_args: str):
     )
     assert e1 is not None
 
-    # run with evaluate() and "arc_easy" test config (included from ./testconfigs path)
+    # Run with evaluate() and the included arc_easy test config.
     lm = api.registry.get_model(model).create_from_arg_string(
         model_args,
         {
@@ -78,7 +78,7 @@ def test_no_include_defaults():
     # should succeed, because we've included an 'arc_easy' task from this dir
     task_dict = tasks.get_task_dict(task_name, task_manager)
 
-    # should fail, since ./testconfigs has no arc_challenge task
+    # This should fail because the included configs have no arc_challenge task.
     task_name = ["arc_challenge"]
     with pytest.raises(KeyError):
         task_dict = tasks.get_task_dict(task_name, task_manager)  # noqa: F841

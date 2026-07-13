@@ -208,8 +208,8 @@ class FLlamaTrainer(Seq2SeqTrainer):
 @dataclass
 class DataTrainingArguments:
     dataset_path: Optional[str] = field(
-        default="./data/datasets/merged/age/",
-        metadata={"help": "The path to the directory with the JSON files of the task."},
+        default=None,
+        metadata={"help": "The path to the directory with the JSON files of the task.", "required": True},
     )
     max_train_samples: Optional[int] = field(
         default=None,
@@ -325,8 +325,8 @@ class ModelArguments:
         metadata={"help": "Will enable to load a pretrained model whose head dimensions are different."},
     )
     initialize_from: str = field(
-        default="meta-llama/Llama-2-7b-hf",
-        metadata={"help": "The model to initialize from."},
+        default=None,
+        metadata={"help": "The model to initialize from.", "required": True},
     )
     ref_initialize_from: str = field(
         default=None,

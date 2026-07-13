@@ -22,7 +22,7 @@ def eval_few_shots(
     output_path=None,
     output_dir=None,
     batch_size=16,
-    cache_dir="./.cache",
+    cache_dir=None,
     device=None,
 ):
     if task_list is None:
@@ -36,14 +36,16 @@ def eval_few_shots(
         if output_dir is not None:
             output_path = os.path.join(output_dir, "few_shots.json")
         else:
-            output_path = "."
+            raise ValueError("eval_few_shots requires output_path or output_dir")
     output_parent = os.path.dirname(output_path)
     if output_parent:
         os.makedirs(output_parent, exist_ok=True)
 
     command = [sys.executable, "-m", "lm_eval"]
     tasks = ",".join(task_list)
-    model_args = f"pretrained={model_name},cache_dir={cache_dir},dtype=auto"
+    model_args = f"pretrained={model_name},dtype=auto"
+    if cache_dir is not None:
+        model_args += f",cache_dir={cache_dir}"
     args = [
         "--model",
         "hf",

@@ -21,7 +21,7 @@ class Winogrande(BaseDataset):
             "allenai/winogrande",
             "winogrande_debiased",
             split="train",
-            cache_dir="./.cache/data",
+            cache_dir=None,
         )
 
         dataset["train"] = train_dataset
@@ -30,7 +30,7 @@ class Winogrande(BaseDataset):
             "allenai/winogrande",
             "winogrande_debiased",
             split="validation",
-            cache_dir="./.cache/data",
+            cache_dir=None,
         )
 
         return dataset

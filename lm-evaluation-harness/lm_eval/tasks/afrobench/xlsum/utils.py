@@ -96,7 +96,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--output-dir",
-        default="./",
+        required=True,
         help="Directory to write yaml files to",
     )
 

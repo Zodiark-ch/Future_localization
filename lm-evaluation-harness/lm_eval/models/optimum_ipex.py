@@ -43,7 +43,7 @@ class IPEXLM(HFLM):
         gpus=None,
         max_memory_per_gpu=None,
         max_cpu_memory=None,
-        offload_folder="./offload",
+        offload_folder=None,
         # PEFT, delta weights and quantization options
         peft=None,
         delta=None,

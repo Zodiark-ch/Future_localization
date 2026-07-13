@@ -4,8 +4,8 @@ import json
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("extract results for Detoxify unlearning")
-    parser.add_argument("--path", type=str, help="path to the forget path")
-    parser.add_argument("--retrain_path", type=str, default="storage/Results/Retrain/tofu.json")    
+    parser.add_argument("--path", type=str, required=True, help="Forget-result file")
+    parser.add_argument("--retrain_path", type=str, required=True, help="Retraining-result file")
 
     args = parser.parse_args()
 

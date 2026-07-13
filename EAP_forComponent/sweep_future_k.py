@@ -19,7 +19,7 @@ if str(REPO_ROOT) not in sys.path:
 
 from EAP_forComponent.runner import EAPForComponentRunner
 from EAP_forComponent.datasets import SUPPORTED_DATASET_NAMES
-from EAP_forComponent.schemas import DEFAULT_CACHE_DIR, DEFAULT_TARGET_MODULES, EAPComponentConfig
+from EAP_forComponent.schemas import DEFAULT_TARGET_MODULES, EAPComponentConfig
 
 
 SCORE_KEYS = ("raw_score", "abs_score", "mean_score", "sqrt_numel_score", "rank_score")
@@ -28,29 +28,28 @@ TOPK_VALUES = (50, 100, 200, 500, 1000)
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Sweep future_step_k and compare future EAP scores/ranks to current EAP.")
-    parser.add_argument("--current_model_name_or_path", default="/home/chenhang/CSAT/files/logs/2026-06-23-20-13-46-098548/checkpoints/checkpoint-20260623-202127-final")
-    parser.add_argument("--future_base_model_name_or_path", default="mistralai/Mistral-7B-v0.1")
-    parser.add_argument("--future_model_name_or_path", default="/home/chenhang/CSAT/files/logs/2026-06-23-20-56-01-284411/probingmodel.pt")
+    parser.add_argument("--current_model_name_or_path")
+    parser.add_argument("--future_base_model_name_or_path")
+    parser.add_argument("--future_model_name_or_path", required=True)
     parser.add_argument(
         "--model_name_or_path",
-        default=None,
         help="Compatibility fallback used for both current_model_name_or_path and future_base_model_name_or_path.",
     )
-    parser.add_argument("--current_tokenizer_name_or_path", default="mistralai/Mistral-7B-v0.1")
-    parser.add_argument("--future_tokenizer_name_or_path", default="mistralai/Mistral-7B-v0.1")
-    parser.add_argument("--tokenizer_name_or_path", default="mistralai/Mistral-7B-v0.1")
-    parser.add_argument("--cache_dir", default=DEFAULT_CACHE_DIR)
+    parser.add_argument("--current_tokenizer_name_or_path")
+    parser.add_argument("--future_tokenizer_name_or_path")
+    parser.add_argument("--tokenizer_name_or_path")
+    parser.add_argument("--cache_dir")
     parser.add_argument("--dataset_name", choices=SUPPORTED_DATASET_NAMES, default="5_digit_arithmetic")
-    parser.add_argument("--data_path", default=None)
+    parser.add_argument("--data_path")
     parser.add_argument("--corruption_column", default="corrupted")
     parser.add_argument("--input_format", choices=["auto", "prompt", "raw"], default="auto")
-    parser.add_argument("--output_dir", default="files/component_k_sweep/5_digit_arithmetic")
-    parser.add_argument("--work_dir", default=None)
+    parser.add_argument("--output_dir", required=True)
+    parser.add_argument("--work_dir")
     parser.add_argument("--metric", choices=["task_loss", "logit_diff"], default="task_loss")
     parser.add_argument("--target_modules", default=",".join(DEFAULT_TARGET_MODULES))
     parser.add_argument("--attention_granularity", choices=["projection_matrix", "head"], default="head")
-    parser.add_argument("--future_model_cache_dir", default=None)
-    parser.add_argument("--future_delta_parameter_filter", default=None)
+    parser.add_argument("--future_model_cache_dir")
+    parser.add_argument("--future_delta_parameter_filter")
     parser.add_argument("--future_hvp_strategy", choices=["hvp", "finite_difference"], default="finite_difference")
     parser.add_argument("--future_finite_difference_epsilon", type=float, default=1e-3)
     parser.add_argument("--score_token_mode", choices=["all_active", "label_position"], default="all_active")

@@ -221,13 +221,14 @@ class Circuit:
 def parse_args():
     parser = argparse.ArgumentParser()
     
-    parser.add_argument("-circuit1", "--circuit1", type=str, default="/home/lthpc/hangc/CSAT/Edge-Pruning/data/runs/cyber_edges/edges_bool.json")
-    parser.add_argument("-circuit2", "--circuit2", type=str, default="/home/lthpc/hangc/CSAT/Edge-Pruning/data/runs/winogrande_edges/edges_bool.json")
-    parser.add_argument("-circuit3", "--circuit3", type=str, default="/home/lthpc/hangc/CSAT/Edge-Pruning/data/runs/sst2_edges/edges_bool.json")
-    parser.add_argument("-circuit4", "--circuit4", type=str, default="/home/lthpc/hangc/CSAT/Edge-Pruning/data/runs/bool_edges/edges_bool.json")
-    parser.add_argument("-circuit5", "--circuit5", type=str, default="/home/lthpc/hangc/CSAT/Edge-Pruning/data/runs/ioi_edges/edges_bool.json")
-    parser.add_argument("-circuit6", "--circuit6", type=str, default="/home/lthpc/hangc/CSAT/Edge-Pruning/data/runs/gp_edges/edges_bool.json")
-    parser.add_argument("-circuit7", "--circuit7", type=str, default="/home/lthpc/hangc/CSAT/Edge-Pruning/data/runs/induction_edges/edges_bool.json")
+    parser.add_argument("-circuit1", "--circuit1", type=str)
+    parser.add_argument("-circuit2", "--circuit2", type=str)
+    parser.add_argument("-circuit3", "--circuit3", type=str)
+    parser.add_argument("-circuit4", "--circuit4", type=str)
+    parser.add_argument("-circuit5", "--circuit5", type=str)
+    parser.add_argument("-circuit6", "--circuit6", type=str)
+    parser.add_argument("-circuit7", "--circuit7", type=str)
+    parser.add_argument("--output_dir", type=str, required=True)
     parser.add_argument("-w", "--with_embedding_nodes", action="store_true", default=True)
     
     args = parser.parse_args()
@@ -1266,7 +1267,7 @@ def main():
     suffix = "_".join(circuit_names)
     
     # 保存目录
-    save_dir = "/home/lthpc/hangc/CSAT/Edge-Pruning/data/masks/"
+    save_dir = args.output_dir
     os.makedirs(save_dir, exist_ok=True)
     
     # 保存conflict_node_list

@@ -16,7 +16,6 @@ _EXEC_DIR = os.path.dirname(os.path.abspath(__file__))
 _SRC_ROOT = os.path.abspath(os.path.join(_EXEC_DIR, ".."))
 
 
-_DEFAULT_HF_CACHE_DIR = "/home/chenhang/CSAT/.cache"
 if _SRC_ROOT not in sys.path:
     sys.path.insert(0, _SRC_ROOT)
 
@@ -32,8 +31,7 @@ def _prepare_cache_dir(cache_dir: str | None) -> str | None:
         return None
     if "你的" in s:
         print(
-            "错误: --cache_dir 里出现了占位符「你的」，请删掉该参数（用默认缓存）或换成本机真实目录。\n"
-            "示例: 省略 --cache_dir，或 --cache_dir \"$HOME/.cache/huggingface\""
+            "错误: --cache_dir 里出现了占位符「你的」，请省略该参数或提供本机可写目录。"
         )
         sys.exit(2)
     path = os.path.abspath(os.path.expanduser(s))
@@ -125,15 +123,11 @@ def check_batch(
 
 def main():
     parser = argparse.ArgumentParser(description="检查 batch 中 token/label 是否越界")
-    parser.add_argument("--model_name", type=str, default="mistralai/Mistral-7B-v0.1")
+    parser.add_argument("--model_name", type=str, required=True)
     parser.add_argument(
         "--cache_dir",
         type=str,
-        default=_DEFAULT_HF_CACHE_DIR,
-        help=(
-            f"默认与 unlearn_model_conlict 一致: {_DEFAULT_HF_CACHE_DIR}。"
-            "若传空字符串则改用 Transformers/HF 默认缓存（不设 cache_dir）"
-        ),
+        help="可选缓存目录；省略时使用 Transformers 默认缓存。",
     )
     parser.add_argument("--forget_dataset_name", type=str, default="WMDPCyber")
     parser.add_argument("--retain_dataset_name", type=str, default="IOI,gender")
@@ -178,7 +172,7 @@ def main():
     if cache_dir is not None:
         print("cache_dir:", cache_dir)
     else:
-        print("cache_dir: (默认，通常 ~/.cache/huggingface 或 $HF_HOME)")
+        print("cache_dir: Transformers default")
     print()
 
     load_kw = {}

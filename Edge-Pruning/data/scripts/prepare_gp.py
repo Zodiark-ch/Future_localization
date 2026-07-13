@@ -10,12 +10,12 @@ from transformers import AutoTokenizer
 def parse_args():
     parser = argparse.ArgumentParser()
     
-    parser.add_argument("--names", "-n", default="data/helper_files/names.json")
-    parser.add_argument("--templates", "-t", default="data/helper_files/templates-gp.json")
+    parser.add_argument("--names", "-n", required=True)
+    parser.add_argument("--templates", "-t", required=True)
     parser.add_argument("--train", "-tr", default=150, type=int)
     parser.add_argument("--validation", "-va", default=150, type=int)
     parser.add_argument("--test", "-tt", default=3000, type=int)
-    parser.add_argument("--out-path", "-o", default="data/datasets/gp")
+    parser.add_argument("--out-path", "-o", required=True)
     parser.add_argument("--enforce-single-token", "-e", action="store_true")
     parser.add_argument("--split-by-template", "-b", action="store_true")
     parser.add_argument("--seed", "-s", type=int, default=42)

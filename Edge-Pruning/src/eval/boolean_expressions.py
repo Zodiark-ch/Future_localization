@@ -37,10 +37,10 @@ def bad(text):
 def parse_args():
     parser = argparse.ArgumentParser()
     
-    parser.add_argument("--model_name_or_path", "-m", default="meta-llama/CodeLlama-13b-Instruct-hf")
+    parser.add_argument("--model_name_or_path", "-m", required=True)
     parser.add_argument("--edges", "-e", default=None)
-    parser.add_argument("--reference_model", "-r", default="meta-llama/CodeLlama-13b-Instruct-hf")
-    parser.add_argument("--dataset-path", "-d", default="data/datasets/boolean_expressions")
+    parser.add_argument("--reference_model", "-r", required=True)
+    parser.add_argument("--dataset-path", "-d", required=True)
     parser.add_argument("--batch-size", "-b", default=1, type=int)
     parser.add_argument("--skip", "-k", default=0, type=int)
     parser.add_argument("--num-examples", "-n", default=400, type=int)

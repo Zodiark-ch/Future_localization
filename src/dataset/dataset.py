@@ -175,7 +175,7 @@ def create_pku_dataloader_from_dataset(
 
 
 def get_pku_test_dataset(dataset_seed=8888, fraction=1.0):
-    pku_test_dataset = load_dataset("PKU-Alignment/PKU-SafeRLHF", cache_dir="./.cache",revision="ff7ba91063016c78a225b0f74e1c0860bb18230f" )[
+    pku_test_dataset = load_dataset("PKU-Alignment/PKU-SafeRLHF", cache_dir=None,revision="ff7ba91063016c78a225b0f74e1c0860bb18230f" )[
         "test"
     ]
     torch.manual_seed(dataset_seed)
@@ -191,7 +191,7 @@ def get_pku_test_dataset(dataset_seed=8888, fraction=1.0):
 
 
 def get_real_toxic_dataset(dataset_seed=8888, fraction=1.0):
-    toxic_dataset = load_dataset("allenai/real-toxicity-prompts", cache_dir="./.cache")[
+    toxic_dataset = load_dataset("allenai/real-toxicity-prompts", cache_dir=None)[
         "train"
     ]
     torch.manual_seed(dataset_seed)
@@ -208,7 +208,7 @@ def get_real_toxic_dataset(dataset_seed=8888, fraction=1.0):
 
 def bookcorpus_loaders(tokenizer, batch_size):
     dataset = load_dataset(
-        "bookcorpus", "plain_text", split="train", cache_dir="./.cache"
+        "bookcorpus", "plain_text", split="train", cache_dir=None
     )
 
     def preproccess(examples):
@@ -235,7 +235,7 @@ def bookcorpus_loaders(tokenizer, batch_size):
 
 def get_WikiMIA_dataset(LENGTH):
     return load_dataset(
-        "swj0419/WikiMIA", cache_dir="./.cache", split=f"WikiMIA_length{LENGTH}"
+        "swj0419/WikiMIA", cache_dir=None, split=f"WikiMIA_length{LENGTH}"
     )
 
 

@@ -33,7 +33,7 @@ def eval_acc(
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
         torch_dtype=torch.float16,
-        cache_dir="./.cache",
+        cache_dir=None,
         low_cpu_mem_usage=True,
         device_map="auto",
     )

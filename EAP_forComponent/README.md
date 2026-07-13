@@ -31,11 +31,9 @@ Supported pair CSV datasets are `bool`, `gender`, `ioi_mistral`, `sst2`, and `1_
 ## Example
 
 ```bash
-cd /ssd_users/chenhang/CSAT
-/home/chenhang/.conda/envs/LLMSFT_BW/bin/python EAP_forComponent/run_eap_for_component.py \
+python EAP_forComponent/run_eap_for_component.py \
   --model_name_or_path mistralai/Mistral-7B-v0.1 \
   --tokenizer_name_or_path mistralai/Mistral-7B-v0.1 \
-  --cache_dir /home/chenhang/CSAT/.cache \
   --dataset_name ioi_mistral \
   --data_path EAP_forComponent/data/ioi_mistral.csv \
   --output_dir files/component_scores/ioi_mistral \
@@ -58,7 +56,7 @@ Future localization run:
 
 ```bash
 --localization_mode future \
---future_model_name_or_path /path/to/merged-finetuned-model \
+--future_model_name_or_path "$FUTURE_MODEL" \
 --future_step_k 1.0 \
 --future_hvp_strategy finite_difference
 ```
@@ -90,7 +88,7 @@ The finetuning entrypoint can consume this output directory directly when `--fin
 Projection-matrix LoRA uses PEFT `rank_pattern.json`:
 
 ```bash
-/home/chenhang/.conda/envs/LLMSFT_BW/bin/python src/exec/finetuning_model.py \
+python src/exec/finetuning_model.py \
   --finetuning.use_lora 1 \
   --finetuning.lora_mode projection_matrix \
   --finetuning.lora_info_dir files/component_scores/ioi_mistral \
@@ -100,7 +98,7 @@ Projection-matrix LoRA uses PEFT `rank_pattern.json`:
 Head-wise LoRA uses `component_scores.json` and wraps each target `nn.Linear` with a component-wise LoRA module. For `q/k/v`, each head updates its output row slice; for `o_proj`, each head updates the full output through its input column slice; MLP modules remain full-matrix components.
 
 ```bash
-/home/chenhang/.conda/envs/LLMSFT_BW/bin/python src/exec/finetuning_model.py \
+python src/exec/finetuning_model.py \
   --finetuning.use_lora 1 \
   --finetuning.lora_mode head \
   --finetuning.lora_info_dir files/component_scores/ioi_mistral \

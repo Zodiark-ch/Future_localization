@@ -18,11 +18,11 @@ class SafePkuDataset(BaseDataset):
 
     def get_dataset(self):
         train_dataset = load_dataset(
-            "PKU-Alignment/PKU-SafeRLHF", cache_dir="./.cache",revision="ff7ba91063016c78a225b0f74e1c0860bb18230f"
+            "PKU-Alignment/PKU-SafeRLHF", cache_dir=None,revision="ff7ba91063016c78a225b0f74e1c0860bb18230f"
         )["train"]
         dataset = defaultdict()
         dataset["train"] = train_dataset
-        test_dataset = load_dataset("PKU-Alignment/PKU-SafeRLHF", cache_dir="./.cache",revision="ff7ba91063016c78a225b0f74e1c0860bb18230f")[
+        test_dataset = load_dataset("PKU-Alignment/PKU-SafeRLHF", cache_dir=None,revision="ff7ba91063016c78a225b0f74e1c0860bb18230f")[
             "test"
         ]
         dataset["test"] = test_dataset

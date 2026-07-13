@@ -219,7 +219,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--output-dir",
-        default="./manual/translate",
+        required=True,
         help="Directory to write yaml files to",
     )
     parser.add_argument(

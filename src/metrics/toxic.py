@@ -14,7 +14,7 @@ def eval_toxic_forget(model, tokenizer, dataset, batch_size=4):
         "text-classification",
         model="unitary/toxic-bert",
         device=0,
-        model_kwargs={"cache_dir": "./.cache"},
+        model_kwargs={"cache_dir": None},
     )
     generated_texts = []
     scores = []
@@ -78,7 +78,7 @@ def eval_real_toxic(model, tokenizer, batch_size=4, dataset_seed=8888, fraction=
         "text-classification",
         model="unitary/toxic-bert",
         device=0,
-        model_kwargs={"cache_dir": "./.cache"},
+        model_kwargs={"cache_dir": None},
     )
     test_data = get_real_toxic_dataset(dataset_seed, fraction)
 
@@ -126,7 +126,7 @@ def eval_pku_toxic(model, tokenizer, batch_size=4, dataset_seed=8888, fraction=1
         "text-classification",
         model="unitary/toxic-bert",
         device=0,
-        model_kwargs={"cache_dir": "./.cache"},
+        model_kwargs={"cache_dir": None},
     )
     test_data = get_pku_test_dataset(dataset_seed, fraction)
 
@@ -184,7 +184,7 @@ def eval_toxic(
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
         torch_dtype=torch.float16,
-        cache_dir="./.cache",
+        cache_dir=None,
         low_cpu_mem_usage=True,
         device_map="auto",
     )

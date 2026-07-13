@@ -139,14 +139,14 @@ def eval_MIA(
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
         torch_dtype=torch.float16,
-        cache_dir="./.cache",
+        cache_dir=None,
         low_cpu_mem_usage=True,
         device_map="auto",
     )
     ref_model = AutoModelForCausalLM.from_pretrained(
         ref_model_name,
         torch_dtype=torch.float16,
-        cache_dir="./.cache",
+        cache_dir=None,
         low_cpu_mem_usage=True,
         device_map="auto",
     )
@@ -171,14 +171,14 @@ if __name__ == "__main__":
     model_ref = AutoModelForCausalLM.from_pretrained(
         "facebook/opt-350m",
         torch_dtype=torch.float16,
-        cache_dir="./.cache",
+        cache_dir=None,
         low_cpu_mem_usage=True,
         device_map="auto",
     )
     model = AutoModelForCausalLM.from_pretrained(
         "facebook/opt-1.3b",
         torch_dtype=torch.float16,
-        cache_dir="./.cache",
+        cache_dir=None,
         low_cpu_mem_usage=True,
         device_map="auto",
     )

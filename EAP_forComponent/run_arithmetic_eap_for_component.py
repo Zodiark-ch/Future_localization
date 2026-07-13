@@ -8,46 +8,27 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 RUNNER = REPO_ROOT / "EAP_forComponent" / "run_eap_for_component.py"
-DEFAULT_OUTPUT_ROOT = Path("/home/chenhang/CSAT/files/masks/Future")
-
-
-TASKS = (
-    (
-        "1_digit_arithmetic",
-        "/home/chenhang/CSAT/files/logs/2026-06-23-21-00-50-135055/probingmodel.pt",
-    ),
-    (
-        "2_digit_arithmetic",
-        "/home/chenhang/CSAT/files/logs/2026-06-23-21-00-07-288240/probingmodel.pt",
-    ),
-    (
-        "3_digit_arithmetic",
-        "/home/chenhang/CSAT/files/logs/2026-06-23-20-59-28-178801/probingmodel.pt",
-    ),
-    (
-        "4_digit_arithmetic",
-        "/home/chenhang/CSAT/files/logs/2026-06-23-20-58-39-372632/probingmodel.pt",
-    ),
-    (
-        "5_digit_arithmetic",
-        "/home/chenhang/CSAT/files/logs/2026-06-23-20-56-01-284411/probingmodel.pt",
-    ),
-)
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Run EAP_forComponent sequentially for 1- to 5-digit arithmetic datasets."
     )
+    parser.add_argument("--model_name_or_path", required=True)
+    parser.add_argument("--tokenizer_name_or_path")
+    parser.add_argument("--cache_dir")
     parser.add_argument(
         "--output_root",
-        default=str(DEFAULT_OUTPUT_ROOT),
+        required=True,
         help="Parent directory for per-dataset EAP outputs.",
     )
     parser.add_argument(
-        "--python",
-        default=sys.executable,
-        help="Python executable used to run EAP_forComponent/run_eap_for_component.py.",
+        "--task_model",
+        action="append",
+        required=True,
+        type=_parse_task_model,
+        metavar="DATASET=MODEL",
+        help="Arithmetic dataset and its future model. Repeat for each task.",
     )
     parser.add_argument(
         "--dry_run",
@@ -60,21 +41,38 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     output_root = Path(args.output_root)
-    for dataset_name, future_model_name_or_path in TASKS:
+    for dataset_name, future_model_name_or_path in args.task_model:
         output_dir = output_root / dataset_name
         command = [
-            args.python,
+            sys.executable,
             str(RUNNER),
+            "--model_name_or_path",
+            args.model_name_or_path,
             "--dataset_name",
             dataset_name,
+            "--localization_mode",
+            "future",
             "--future_model_name_or_path",
             future_model_name_or_path,
             "--output_dir",
             str(output_dir),
         ]
+        if args.tokenizer_name_or_path:
+            command.extend(["--tokenizer_name_or_path", args.tokenizer_name_or_path])
+        if args.cache_dir:
+            command.extend(["--cache_dir", args.cache_dir])
         print("\n[Arithmetic EAP] " + " ".join(command), flush=True)
         if not args.dry_run:
             subprocess.run(command, cwd=REPO_ROOT, check=True)
+
+
+def _parse_task_model(value: str) -> tuple[str, str]:
+    dataset_name, separator, model_name_or_path = value.partition("=")
+    dataset_name = dataset_name.strip()
+    model_name_or_path = model_name_or_path.strip()
+    if not separator or not dataset_name or not model_name_or_path:
+        raise argparse.ArgumentTypeError("Expected DATASET=MODEL")
+    return dataset_name, model_name_or_path
 
 
 if __name__ == "__main__":

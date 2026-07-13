@@ -2,7 +2,7 @@
     "overall": {
         "model_name": "HuggingFaceH4/zephyr-7b-beta",
         "logger": "json",
-        "cache_dir": "/data/zodiark/CSAT/.cache",
+        "cache_dir": null,
         "seed": 3
     },
     "unlearn": {
@@ -11,7 +11,7 @@
         "lr": 5e-06,
         "weight_decay": 0.0,
         "gradient_accumulation_steps": 4,
-        "mask_path": "/data/zodiark/CSAT/wmdp_0.4.pt",
+        "mask_path": null,
         "task_name": "wmdp",
         "sophia": false,
         "p": 0.01,
@@ -34,7 +34,7 @@
     },
     "logger": {
         "json": {
-            "root": "/data/zodiark/CSAT/files/logs/unlearn_wmdp_all/GradDiff+WAGLE"
+            "root": null
         }
     }
 }

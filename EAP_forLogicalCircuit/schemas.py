@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
-from EAP_forComponent.schemas import DEFAULT_CACHE_DIR, DEFAULT_TARGET_MODULES
+from EAP_forComponent.schemas import DEFAULT_TARGET_MODULES
 
 
 @dataclass
@@ -33,9 +33,9 @@ class EdgeScore:
 
 @dataclass
 class EAPLogicalCircuitConfig:
-    model_name_or_path: str = "mistralai/Mistral-7B-v0.1"
+    model_name_or_path: str | None = None
     tokenizer_name_or_path: str | None = None
-    output_dir: str = "files/logical_circuit/ioi_mistral"
+    output_dir: str | None = None
     dataset_name: str = "ioi_mistral"
     data_path: str | None = None
     corruption_column: str = "corrupted"
@@ -83,6 +83,6 @@ class EAPLogicalCircuitConfig:
     device: str = "cuda:0"
     use_bfloat16: bool = True
     use_cpu: bool = False
-    cache_dir: str | None = DEFAULT_CACHE_DIR
+    cache_dir: str | None = None
     capture_device: str = "cpu"
     metadata: dict[str, Any] = field(default_factory=dict)

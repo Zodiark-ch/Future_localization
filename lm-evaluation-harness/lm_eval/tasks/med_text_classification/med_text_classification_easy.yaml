@@ -4,7 +4,7 @@ dataset_path: csv
 dataset_name: null
 dataset_kwargs:
   data_files:
-    train: /gpfs/projects/bsc70/heka/data/datasets/med_text_class_train.csv
+    train: null
 output_type: multiple_choice
 training_split: train
 validation_split: train

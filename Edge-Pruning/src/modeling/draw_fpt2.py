@@ -6,7 +6,7 @@ import graphviz
 def parse_args():
     parser = argparse.ArgumentParser()
     
-    parser.add_argument("--in_path", "-i", type=str, default='/data/zodiark/CSAT/files/runs/mistral_gp/edges.json')
+    parser.add_argument("--in_path", "-i", type=str, required=True)
     parser.add_argument("--out_path", "-o", type=str, default=None)
     parser.add_argument("--constants", "-c", default=[], nargs="+")
     parser.add_argument("--no-sanitize", "-ns", action="store_true")
@@ -156,14 +156,14 @@ def rename(name):
 
 def main():
     args = parse_args()
-    
+
     # 首先检查文件是否存在和基本信息
     if not os.path.exists(args.in_path):
         raise FileNotFoundError(f"文件不存在: {args.in_path}")
-    
+
     file_size = os.path.getsize(args.in_path)
     print(f"文件大小: {file_size} 字节")
-    
+
     # 检查文件的前几个字节
     try:
         with open(args.in_path, 'rb') as f:
@@ -172,7 +172,7 @@ def main():
             print(f"文件前50个字节(hex): {first_bytes.hex()}")
     except Exception as e:
         print(f"读取文件字节时出错: {e}")
-    
+
     # 尝试不同的编码方式读取文件
     encodings = ['utf-8', 'utf-8-sig', 'latin-1', 'cp1252', 'iso-8859-1']
     edges = None
@@ -183,7 +183,7 @@ def main():
                 content = f.read()
                 print(f"使用 {encoding} 编码读取成功，文件内容长度: {len(content)} 字符")
                 print(f"文件内容前200字符: {repr(content[:200])}")
-                
+
                 # 尝试解析JSON
                 edges = json.loads(content)
                 print(f"JSON解析成功，数据类型: {type(edges)}")
@@ -192,7 +192,7 @@ def main():
                     if len(edges) > 0:
                         print(f"第一个元素: {edges[0]}")
                 break
-                
+
         except UnicodeDecodeError as e:
             print(f"使用 {encoding} 编码失败: {e}")
             continue
@@ -203,7 +203,7 @@ def main():
         except Exception as e:
             print(f"使用 {encoding} 编码时发生其他错误: {e}")
             continue
-    
+
     if edges is None:
         print("\n所有编码方式都失败了。请检查:")
         print("1. 文件是否是有效的JSON格式")

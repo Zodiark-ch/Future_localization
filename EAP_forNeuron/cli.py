@@ -2,19 +2,19 @@ from __future__ import annotations
 
 import argparse
 
-from EAP_forNeuron.schemas import DEFAULT_CACHE_DIR, DEFAULT_TARGET_MODULES, EAPNeuronConfig
+from EAP_forNeuron.schemas import DEFAULT_TARGET_MODULES, EAPNeuronConfig
 from EAP_forNeuron.datasets import SUPPORTED_DATASET_NAMES
 from EAP_forNeuron.runner import EAPForNeuronRunner
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Refine a CSAT gradient mask with parameter-level EAP attribution.")
-    parser.add_argument("--model_name_or_path", default="mistralai/Mistral-7B-v0.1")
-    parser.add_argument("--tokenizer_name_or_path", default="mistralai/Mistral-7B-v0.1")
-    parser.add_argument("--mask_path",  default="/home/chenhang/CSAT/files/masks/gradient/IOI/with_0.2.pt")
-    parser.add_argument("--output_dir",  default="/home/chenhang/CSAT/files/masks/Future/IOI/with_0.2.pt")
+    parser.add_argument("--model_name_or_path", required=True)
+    parser.add_argument("--tokenizer_name_or_path")
+    parser.add_argument("--mask_path", required=True)
+    parser.add_argument("--output_dir", required=True)
     parser.add_argument("--dataset_name", choices=SUPPORTED_DATASET_NAMES, default="ioi_mistral")
-    parser.add_argument("--data_path", default="/ssd_users/chenhang/CSAT/EAP_forNeuron/data/ioi_mistral.csv")
+    parser.add_argument("--data_path")
     parser.add_argument("--corruption_column", default="corrupted")
     parser.add_argument("--metric", choices=["task_loss", "logit_diff"], default="task_loss")
     parser.add_argument("--output_ratio", type=float, default=0.1)
@@ -32,7 +32,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--use_bfloat16", type=_str_to_bool, default=True)
     parser.add_argument("--use_cpu", action="store_true")
-    parser.add_argument("--cache_dir", default=DEFAULT_CACHE_DIR)
+    parser.add_argument("--cache_dir")
     parser.add_argument("--save_scores", action="store_true")
     parser.add_argument("--row_chunk_size", type=int, default=256)
     parser.add_argument("--max_concat_candidates", type=int, default=50_000_000)

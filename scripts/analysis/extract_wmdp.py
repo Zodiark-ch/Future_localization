@@ -50,7 +50,7 @@ def extract_wmdp_results(path):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("extract results for Detoxify unlearning")
-    parser.add_argument("--root", type=str, help="path to the root directory")
+    parser.add_argument("--root", type=str, required=True, help="Result root directory")
     args = parser.parse_args()
     few_shots_path = f"{args.root}/mmlu.json"
     # forget_path = f"{args.root}/forget.json"

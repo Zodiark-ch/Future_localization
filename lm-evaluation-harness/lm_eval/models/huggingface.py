@@ -87,7 +87,7 @@ class HFLM(TemplateLM):
         parallelize: Optional[bool] = False,
         max_memory_per_gpu: Optional[Union[int, str]] = None,
         max_cpu_memory: Optional[Union[int, str]] = None,
-        offload_folder: Optional[Union[str, os.PathLike]] = "./offload",
+        offload_folder: Optional[Union[str, os.PathLike]] = None,
         # PEFT, delta weights and quantization options
         peft: Optional[str] = None,
         delta: Optional[str] = None,
@@ -316,7 +316,7 @@ class HFLM(TemplateLM):
         device_map: Optional[str] = "auto",
         max_memory_per_gpu: Optional[Union[int, str]] = None,
         max_cpu_memory: Optional[Union[int, str]] = None,
-        offload_folder: Optional[str] = "./offload",
+        offload_folder: Optional[str] = None,
         gpus: Optional[int] = None,
     ) -> dict:
         """Returns the kwargs needed to apply `accelerate` in `AutoModel.from_pretrained`."""
@@ -555,7 +555,7 @@ class HFLM(TemplateLM):
         gpus: Optional[int] = None,
         max_memory_per_gpu: Optional[Union[int, str]] = None,
         max_cpu_memory: Optional[Union[int, str]] = None,
-        offload_folder: Optional[str] = "./offload",
+        offload_folder: Optional[str] = None,
         # PEFT, delta weights and quantization options
         peft: Optional[str] = None,
         delta: Optional[str] = None,

@@ -21,7 +21,7 @@ class C4(BaseDataset):
             "allenai/c4",
             data_files={"train": "en/c4-train.00001-of-01024.json.gz"},
             split="train",
-            cache_dir="./.cache/data",
+            cache_dir=None,
         )
 
         dataset["train"] = train_dataset
@@ -30,7 +30,7 @@ class C4(BaseDataset):
             "allenai/c4",
             data_files={"validation": "en/c4-validation.00000-of-00008.json.gz"},
             split="validation",
-            cache_dir="./.cache/data",
+            cache_dir=None,
         )
 
         return dataset

@@ -43,8 +43,7 @@ def _check_runtime_environment(use_cpu=False):
             "This run is using a PyTorch CUDA build that is incompatible with Blackwell "
             f"GPUs: torch={torch.__version__}, torch_cuda={torch.version.cuda}, "
             f"device={device_name}, python={sys.executable}. Activate the Blackwell "
-            "environment and run with its interpreter, for example: "
-            "/home/chenhang/.conda/envs/LLMSFT_BW/bin/python src/exec/finetuning_model.py"
+            "environment and rerun this entrypoint with that environment's interpreter."
         )
 
 
@@ -52,11 +51,10 @@ Section("overall", "Overall configs").params(
     model_name=Param(
         str,
         required=True,
-        default="mistralai/Mistral-7B-v0.1",
         desc="Model name",
     ),
     logger=Param(OneOf(["json", "none"]), default="json", desc="Logger to use"),
-    cache_dir=Param(Folder(True), default="/home/chenhang/CSAT/.cache", desc="Cache directory"),
+    cache_dir=Param(str, default=None, desc="Optional cache directory"),
     seed=Param(int, default=0, desc="Random seed"),
     use_cpu=Param(BoolAsInt(), default=0, desc="Force CPU execution for debugging"),
 )
@@ -80,10 +78,9 @@ Section("finetuning", "Finetuning configs").params(
         default="TargetFT",
         desc="Finetuning objective",
     ),
-    mask_path=Param(str, default=None, desc="Path to a single finetuning mask"),#none is without mask
+    mask_path=Param(str, default=None, desc="Path to a single finetuning mask"),
     target_mask_path=Param(
         str,
-        #default="/ssd_users/chenhang/CSAT/files/logical_circuit/bool+IOI+sst2+arithmetic/IOI_future/component_mask.pt",
         default=None,
         desc="Target-task mask path. If empty, falls back to mask_path for backward compatibility.",
 
@@ -91,19 +88,16 @@ Section("finetuning", "Finetuning configs").params(
     pervasiveness_mask_paths=Param(
         str,
         default=None,
-        #default="/ssd_users/chenhang/CSAT/files/logical_circuit/bool+IOI+sst2+arithmetic/sst2_future/component_mask.pt, /ssd_users/chenhang/CSAT/files/logical_circuit/bool+IOI+sst2+arithmetic/bool_future/component_mask.pt,/ssd_users/chenhang/CSAT/files/logical_circuit/bool+IOI+sst2+arithmetic/5_digit_arithmetic_future/component_mask.pt",
         desc="Comma-separated pervasiveness task mask paths. Must match pervasiveness dataset count when provided.",
     ),
     conflict_mask_path=Param(
         str,
         default=None,
-        #default="/ssd_users/chenhang/CSAT/files/logical_circuit/bool+IOI+sst2+arithmetic/conflict_analysis_future/conflict_components/component_mask.pt",
         desc="Conflict component mask path (recorded in Phase 6; not used by training loop yet).",
     ),
     all_component_mask_path=Param(
         str,
         default=None,
-        #default="/ssd_users/chenhang/CSAT/files/logical_circuit/bool+IOI+sst2+arithmetic/conflict_analysis_future/all_task_components/component_mask.pt",
         desc="All-task component mask path for stage-2 multitask training (recorded in Phase 6).",
     ),
     mask_score_type=Param(str, default="gradient", desc="Mask score type"),
@@ -131,32 +125,27 @@ Section("finetuning", "Finetuning configs").params(
     ),
     lora_info_dir=Param(
         str,
-        #default="/home/chenhang/CSAT/files/masks/Future/2_digit_arithmetic",
         default=None,
         desc="Directory produced by EAP_forComponent containing rank_pattern.json/component_scores.json/summary.json",
     ),
     target_lora_info_dir=Param(
         str,
         default=None,
-        #default="/ssd_users/chenhang/CSAT/files/logical_circuit/bool+IOI+sst2+arithmetic/IOI_future",
         desc="Target-task LoRA info dir. If empty, falls back to lora_info_dir for backward compatibility.",
     ),
     pervasiveness_lora_info_dirs=Param(
         str,
         default=None,
-        #default="/ssd_users/chenhang/CSAT/files/logical_circuit/bool+IOI+sst2+arithmetic/sst2_future, /ssd_users/chenhang/CSAT/files/logical_circuit/bool+IOI+sst2+arithmetic/bool_future,/ssd_users/chenhang/CSAT/files/logical_circuit/bool+IOI+sst2+arithmetic/5_digit_arithmetic_future",
         desc="Comma-separated pervasiveness task LoRA info dirs. Must match pervasiveness dataset count when provided.",
     ),
     conflict_lora_info_dir=Param(
         str,
         default=None,
-        #default="/ssd_users/chenhang/CSAT/files/logical_circuit/bool+IOI+sst2+arithmetic/conflict_analysis_future/conflict_components",
         desc="Conflict component LoRA info dir (recorded in Phase 6).",
     ),
     all_component_lora_info_dir=Param(
         str,
         default=None,
-        #default="/ssd_users/chenhang/CSAT/files/logical_circuit/bool+IOI+sst2+arithmetic/conflict_analysis_future/all_task_components",
         desc="All-task component LoRA info dir for stage-2 training (recorded in Phase 6).",
     ),
     multi_task_schedule=Param(
@@ -190,17 +179,17 @@ Section("finetuning", "Finetuning configs").params(
     lora_rank_pattern_path=Param(
         str,
         default=None,
-        desc="Optional explicit PEFT rank_pattern.json path; defaults to lora_info_dir/rank_pattern.json",
+        desc="Optional explicit PEFT rank pattern file; otherwise discovered from the LoRA metadata.",
     ),
     lora_alpha_pattern_path=Param(
         str,
         default=None,
-        desc="Optional explicit PEFT alpha_pattern.json path; defaults to lora_info_dir/alpha_pattern.json if present",
+        desc="Optional explicit PEFT alpha pattern file; otherwise discovered from the LoRA metadata.",
     ),
     lora_component_scores_path=Param(
         str,
         default=None,
-        desc="Optional explicit component_scores.json path for head-wise LoRA; defaults to lora_info_dir/component_scores.json",
+        desc="Optional explicit component score file; otherwise discovered from the LoRA metadata.",
     ),
     lora_head_min_rank=Param(int, default=1, desc="Minimum rank for custom head-wise/component-wise LoRA"),
     lora_head_max_rank=Param(int, default=32, desc="Maximum rank for custom head-wise/component-wise LoRA"),
@@ -274,7 +263,7 @@ Section("logger", "General logger configs").params(
 Section("logger.json", "JSON logger").enable_if(
     lambda cfg: cfg["overall.logger"] == "json"
 ).params(
-    root=Param(Folder(True), default="/home/chenhang/CSAT/files/logs", desc="Path to log folder"),
+    root=Param(Folder(True), required=True, desc="Path to log folder"),
 )
 
 

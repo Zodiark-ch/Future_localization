@@ -4,25 +4,25 @@ import argparse
 
 from EAP_forComponent.runner import EAPForComponentRunner
 from EAP_forComponent.datasets import SUPPORTED_DATASET_NAMES
-from EAP_forComponent.schemas import DEFAULT_CACHE_DIR, DEFAULT_TARGET_MODULES, EAPComponentConfig
+from EAP_forComponent.schemas import DEFAULT_TARGET_MODULES, EAPComponentConfig
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Compute component-level EAP attribution for LoRA rank allocation.")
-    parser.add_argument("--model_name_or_path", default="mistralai/Mistral-7B-v0.1")
-    parser.add_argument("--tokenizer_name_or_path", default="mistralai/Mistral-7B-v0.1")
-    parser.add_argument("--cache_dir", default=DEFAULT_CACHE_DIR)
+    parser.add_argument("--model_name_or_path", required=True)
+    parser.add_argument("--tokenizer_name_or_path")
+    parser.add_argument("--cache_dir")
     parser.add_argument("--dataset_name", choices=SUPPORTED_DATASET_NAMES, default="2_digit_arithmetic")
-    parser.add_argument("--data_path", default=None)
+    parser.add_argument("--data_path")
     parser.add_argument("--corruption_column", default="corrupted")
     parser.add_argument("--input_format", choices=["auto", "prompt", "raw"], default="auto")
-    parser.add_argument("--output_dir", default="/home/chenhang/CSAT/files/masks/Probing/2_digit_arithmetic")
+    parser.add_argument("--output_dir", required=True)
     parser.add_argument("--metric", choices=["task_loss", "logit_diff"], default="task_loss")
     parser.add_argument("--target_modules", default=",".join(DEFAULT_TARGET_MODULES))
     parser.add_argument("--attention_granularity", choices=["projection_matrix", "head"], default="head")
     parser.add_argument("--localization_mode", choices=["current", "future", "current_localization", "future_localization"], default="current")
-    parser.add_argument("--future_model_name_or_path", default="/home/chenhang/CSAT/files/logs/2026-06-23-21-00-07-288240/probingmodel.pt")
-    parser.add_argument("--future_model_cache_dir", default=None)
+    parser.add_argument("--future_model_name_or_path")
+    parser.add_argument("--future_model_cache_dir")
     parser.add_argument("--future_step_k", type=float, default=1.0, help="Fixed K used when --future_step_k_samples <= 1.")
     parser.add_argument("--future_step_k_min", type=float, default=0)
     parser.add_argument("--future_step_k_max", type=float, default=70)

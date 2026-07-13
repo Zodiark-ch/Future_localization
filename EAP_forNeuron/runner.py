@@ -25,6 +25,8 @@ class EAPForNeuronRunner:
         self.mask_spec: MaskSpec | None = None
 
     def run(self) -> dict[str, Path]:
+        if not self.config.model_name_or_path:
+            raise ValueError("model_name_or_path is required")
         if self.config.mask_path is None:
             raise ValueError("mask_path is required")
         if self.config.output_dir is None:
