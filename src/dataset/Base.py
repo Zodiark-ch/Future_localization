@@ -33,13 +33,13 @@ class UnlearnDataset(Dataset):
         else:
             self.forget_dataset = None
 
-        # 处理多个retain数据集的情况
+
         self.retain_datasets = {}
         for key, value in datasets.items():
             if key.startswith("retain"):
                 self.retain_datasets[key] = value
-        
-        # 如果没有retain数据集，设置为None
+
+
         if not self.retain_datasets:
             self.retain_datasets = {"retain": None}
 
@@ -49,7 +49,7 @@ class UnlearnDataset(Dataset):
         if self.forget_dataset:
             return len(self.forget_dataset)
         elif self.retain_datasets:
-            # 返回第一个非None的retain数据集的长度
+
             for dataset in self.retain_datasets.values():
                 if dataset is not None:
                     return len(dataset)
@@ -70,7 +70,7 @@ class UnlearnDataset(Dataset):
                 retain_index_list = list(
                     set(range(len(self.forget_dataset))) - set(forget_index_list)
                 )
-                # 对于多个retain数据集的情况，将self_retain的数据分配给第一个retain数据集
+
                 first_retain_key = list(self.retain_datasets.keys())[0]
                 self.retain_datasets[first_retain_key] = self.forget_dataset.select(retain_index_list)
             self.forget_dataset = self.forget_dataset.select(forget_index_list)
@@ -79,15 +79,15 @@ class UnlearnDataset(Dataset):
         if self.forget_dataset:
             forget_data = self.forget_dataset[idx]
             if self.retain_datasets:
-                # 随机选择一个retain数据集
+
                 available_retain_keys = [key for key, dataset in self.retain_datasets.items() if dataset is not None]
                 if available_retain_keys:
                     selected_retain_key = random.choice(available_retain_keys)
                     selected_retain_dataset = self.retain_datasets[selected_retain_key]
                     retain_idx = random.randint(0, len(selected_retain_dataset) - 1)
                     retain_data = selected_retain_dataset[retain_idx]
-                    
-                    # 如果是单个retain数据集且键名是"retain"，保持向后兼容性
+
+
                     if len(self.retain_datasets) == 1 and "retain" in self.retain_datasets:
                         return {"forget": forget_data, "retain": retain_data}
                     else:
@@ -97,11 +97,11 @@ class UnlearnDataset(Dataset):
             else:
                 return {"forget": forget_data, "retain": None}
         else:
-            # 如果没有forget数据集，从第一个可用的retain数据集中获取数据
+
             for key, dataset in self.retain_datasets.items():
                 if dataset is not None:
                     retain_data = dataset[idx]
-                    # 如果是单个retain数据集且键名是"retain"，保持向后兼容性
+
                     if len(self.retain_datasets) == 1 and "retain" in self.retain_datasets:
                         return {"forget": None, "retain": retain_data}
                     else:
@@ -122,17 +122,17 @@ def unlearncollector(samples):
         )
     else:
         res["forget"] = None
-    
-    # 处理多个retain数据集的情况
+
+
     retain_keys = []
     for key in samples[0].keys():
         if key.startswith("retain"):
             retain_keys.append(key)
-    
-    # 如果没有找到retain键，尝试向后兼容的"retain"键
+
+
     if not retain_keys and "retain" in samples[0]:
         retain_keys = ["retain"]
-    
+
     for retain_key in retain_keys:
         if samples[0][retain_key]:
             retain_samples = [sample[retain_key] for sample in samples]
@@ -143,7 +143,7 @@ def unlearncollector(samples):
             )
         else:
             res[retain_key] = None
-    
+
     return res
 
 
@@ -185,12 +185,19 @@ class FinetuningDataset(Dataset):
         self.build_finetuning_dataset()
 
     def __len__(self):
-        if self.target_dataset is not None:
-            return len(self.target_dataset)
-        for dataset in self.pervasiveness_datasets.values():
-            if dataset is not None:
-                return len(dataset)
+        lengths = self.task_lengths()
+        if lengths:
+            return min(lengths.values())
         raise ValueError("No dataset")
+
+    def task_lengths(self):
+        lengths = {}
+        if self.target_dataset is not None:
+            lengths["target"] = len(self.target_dataset)
+        for key, dataset in self.pervasiveness_datasets.items():
+            if dataset is not None:
+                lengths[key] = len(dataset)
+        return lengths
 
     def build_finetuning_dataset(self):
         if self.target_dataset is None:
@@ -225,23 +232,24 @@ class FinetuningDataset(Dataset):
             self.target_dataset = [self.target_dataset[i] for i in target_index_list]
 
     def __getitem__(self, idx):
-        target_data = None
+        item = {}
         if self.target_dataset is not None:
-            target_data = self.target_dataset[idx]
+            item["target"] = self.target_dataset[idx % len(self.target_dataset)]
+        else:
+            item["target"] = None
 
-        available_keys = [
-            key for key, dataset in self.pervasiveness_datasets.items() if dataset is not None
-        ]
-        if not available_keys:
-            return {"target": target_data, "pervasiveness": None}
+        has_pervasiveness = False
+        for key, dataset in self.pervasiveness_datasets.items():
+            if dataset is None:
+                continue
+            item[key] = dataset[idx % len(dataset)]
+            has_pervasiveness = True
+        if not has_pervasiveness:
+            item["pervasiveness"] = None
+        return item
 
-        selected_key = random.choice(available_keys)
-        selected_dataset = self.pervasiveness_datasets[selected_key]
-        pervasiveness_idx = random.randint(0, len(selected_dataset) - 1)
-        pervasiveness_data = selected_dataset[pervasiveness_idx]
-        if len(self.pervasiveness_datasets) == 1 and "pervasiveness" in self.pervasiveness_datasets:
-            return {"target": target_data, "pervasiveness": pervasiveness_data}
-        return {"target": target_data, selected_key: pervasiveness_data}
+    def collate_fn(self, samples):
+        return finetuning_collator(samples)
 
 
 def _label_field(sample):
@@ -255,41 +263,46 @@ def _clean_labels(labels, attention_mask):
     return labels.masked_fill(attention_mask == 0, -100)
 
 
+def _collate_labeled_samples(labeled_samples):
+    label_key = _label_field(labeled_samples[0])
+    input_ids = torch.stack([sample["input_ids"] for sample in labeled_samples])
+    attention_mask = torch.stack([sample["attention_mask"] for sample in labeled_samples])
+    labels = torch.stack([sample[label_key] for sample in labeled_samples])
+    return (
+        input_ids,
+        attention_mask,
+        _clean_labels(labels, attention_mask),
+    )
+
+
 def finetuning_collator(samples):
     res = {}
     if samples[0].get("target") is not None:
-        target_samples = [sample["target"] for sample in samples]
-        label_key = _label_field(target_samples[0])
-        input_ids = torch.stack([sample["input_ids"] for sample in target_samples])
-        attention_mask = torch.stack([sample["attention_mask"] for sample in target_samples])
-        labels = torch.stack([sample[label_key] for sample in target_samples])
-        res["target"] = (
-            input_ids,
-            attention_mask,
-            _clean_labels(labels, attention_mask),
-        )
+        res["target"] = _collate_labeled_samples([sample["target"] for sample in samples])
     else:
         res["target"] = None
 
-    pervasiveness_keys = [
-        key for key in samples[0].keys() if key.startswith("pervasiveness")
-    ]
+    pervasiveness_keys = sorted(
+        {
+            key
+            for sample in samples
+            for key in sample.keys()
+            if key.startswith("pervasiveness")
+        }
+    )
     if not pervasiveness_keys and "pervasiveness" in samples[0]:
         pervasiveness_keys = ["pervasiveness"]
 
     for pervasiveness_key in pervasiveness_keys:
-        if samples[0].get(pervasiveness_key) is not None:
-            pervasiveness_samples = [sample[pervasiveness_key] for sample in samples]
-            label_key = _label_field(pervasiveness_samples[0])
-            input_ids = torch.stack([sample["input_ids"] for sample in pervasiveness_samples])
-            attention_mask = torch.stack([sample["attention_mask"] for sample in pervasiveness_samples])
-            labels = torch.stack([sample[label_key] for sample in pervasiveness_samples])
-            res[pervasiveness_key] = (
-                input_ids,
-                attention_mask,
-                _clean_labels(labels, attention_mask),
-            )
-        else:
-            res[pervasiveness_key] = None
+        pervasiveness_samples = [
+            sample[pervasiveness_key]
+            for sample in samples
+            if sample.get(pervasiveness_key) is not None
+        ]
+        res[pervasiveness_key] = (
+            _collate_labeled_samples(pervasiveness_samples)
+            if pervasiveness_samples
+            else None
+        )
 
     return res

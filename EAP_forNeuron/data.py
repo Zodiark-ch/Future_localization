@@ -34,10 +34,6 @@ def default_data_path(dataset_name: str) -> Path:
     candidate = root / "data" / f"{dataset_name}.csv"
     if candidate.exists():
         return candidate
-    repo_root = root.parent
-    fallback = repo_root / "EAP-IG" / f"{dataset_name}.csv"
-    if fallback.exists():
-        return fallback
     raise FileNotFoundError(f"No default CSV found for dataset {dataset_name!r}.")
 
 

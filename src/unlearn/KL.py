@@ -31,10 +31,10 @@ class KL(BaseTrainer):
 
         forget_loss = kl_loss(prob_forget_p, prob_forget_q)
 
-        # 处理多个retain数据集的情况
+
         retain_loss = 0.0
         retain_count = 0
-        
+
         for key, retain_data in inputs.items():
             if key.startswith("retain") and retain_data is not None:
                 retain_inputs = {
@@ -53,8 +53,8 @@ class KL(BaseTrainer):
 
                 retain_loss += kl_loss(prob_retain_p, prob_retain_q)
                 retain_count += 1
-        
-        # 如果有retain数据集，计算平均损失
+
+
         if retain_count > 0:
             retain_loss = retain_loss / retain_count
             loss = -self.gamma * forget_loss + retain_loss
@@ -81,10 +81,10 @@ class KL_GA(KL):
 
         forget_loss = -outputs.loss
 
-        # 处理多个retain数据集的情况
+
         retain_loss = 0.0
         retain_count = 0
-        
+
         for key, retain_data in inputs.items():
             if key.startswith("retain") and retain_data is not None:
                 retain_inputs = {
@@ -103,8 +103,8 @@ class KL_GA(KL):
 
                 retain_loss += kl_loss(prob_retain_p, prob_retain_q)
                 retain_count += 1
-        
-        # 如果有retain数据集，计算平均损失
+
+
         if retain_count > 0:
             retain_loss = retain_loss / retain_count
             loss = self.gamma * forget_loss + retain_loss
@@ -131,10 +131,10 @@ class KL_CL(KL):
 
         forget_loss = outputs.loss
 
-        # 处理多个retain数据集的情况
+
         retain_loss = 0.0
         retain_count = 0
-        
+
         for key, retain_data in inputs.items():
             if key.startswith("retain") and retain_data is not None:
                 retain_inputs = {
@@ -153,8 +153,8 @@ class KL_CL(KL):
 
                 retain_loss += kl_loss(prob_retain_p, prob_retain_q)
                 retain_count += 1
-        
-        # 如果有retain数据集，计算平均损失
+
+
         if retain_count > 0:
             retain_loss = retain_loss / retain_count
             loss = self.gamma * forget_loss + retain_loss

@@ -41,7 +41,7 @@ class CL_FT(CL):
         input_ids = forget_data[0].clone()
         postions = forget_data[4]
         labels = forget_data[3][ :, :postions]
-        
+
         pad_id = input_ids[0][-1].item()
         for idx, position in enumerate(postions):
             input_ids[idx, position:] = labels[idx][position:].clone()
@@ -57,10 +57,10 @@ class CL_FT(CL):
 
         forget_loss = outputs.loss
 
-        # 处理多个retain数据集的情况
+
         retain_loss = 0.0
         retain_count = 0
-        
+
         for key, retain_data in inputs.items():
             if key.startswith("retain") and retain_data is not None:
                 retain_inputs = {
@@ -72,8 +72,8 @@ class CL_FT(CL):
                 retain_outputs = model(**retain_inputs)
                 retain_loss += retain_outputs.loss
                 retain_count += 1
-        
-        # 如果有retain数据集，计算平均损失
+
+
         if retain_count > 0:
             retain_loss = retain_loss / retain_count
             loss = forget_loss + self.gamma * retain_loss
@@ -107,10 +107,10 @@ class CL_KL(CL):
 
         forget_loss = outputs.loss
 
-        # 处理多个retain数据集的情况
+
         retain_loss = 0.0
         retain_count = 0
-        
+
         for key, retain_data in inputs.items():
             if key.startswith("retain") and retain_data is not None:
                 retain_inputs = {
@@ -128,8 +128,8 @@ class CL_KL(CL):
 
                 retain_loss += kl_loss(prob_retain_p, prob_retain_q)
                 retain_count += 1
-        
-        # 如果有retain数据集，计算平均损失
+
+
         if retain_count > 0:
             retain_loss = retain_loss / retain_count
             loss = forget_loss + self.gamma * retain_loss

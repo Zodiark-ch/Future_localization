@@ -26,7 +26,8 @@ from EAP_forLogicalCircuit.current_localization import CurrentEdgeAttributionSco
 from EAP_forLogicalCircuit.data import load_pair_dataset
 from EAP_forLogicalCircuit.edge_hooks import DestinationInputCache
 from EAP_forLogicalCircuit.future_localization import FutureEdgeLocalizationScorer
-from EAP_forLogicalCircuit.graph_registry import GraphRegistry, build_graph_metadata_from_model
+from EAP_forLogicalCircuit.graph_export import save_circuit_graph_export
+from EAP_forLogicalCircuit.graph_registry import EdgeTarget, GraphRegistry, build_graph_metadata_from_model
 from EAP_forLogicalCircuit.logical_fusion import fuse_logical_edges
 from EAP_forLogicalCircuit.mask_builder import ComponentMaskBuilder
 from EAP_forLogicalCircuit.model_loader import ensure_src_on_path, load_model_and_tokenizer
@@ -91,6 +92,7 @@ class EAPForLogicalCircuitRunner:
             attention_granularity=component_granularity,
         )
         edge_scores: list[EdgeScore] | None = None
+        graph_edge_scores: list[EdgeScore] | None = None
         node_scores: list[ComponentScore] = []
         circuit_or_node_scores: list[ComponentScore] = []
         circuit_construction_summary: dict = {"construction": circuit_construction}
@@ -118,7 +120,7 @@ class EAPForLogicalCircuitRunner:
                 localization_mode=str(self.config.localization_mode),
             )
             circuit_construction_summary = {
-                "construction": "node_attribution_topn_induced_eap_ig_edges",
+                "construction": "node_attribution_topn_induced_dense_edges",
                 "node_topn": int(self.config.node_topn),
                 "circuit": circuit.summary,
                 "circuit_or": circuit_or.summary,
@@ -130,6 +132,7 @@ class EAPForLogicalCircuitRunner:
             )
             self.graph_metadata = self.registry.metadata
             edge_scores = self.run_attribution(dataloader)
+            graph_edge_scores = edge_scores
             circuit_or_edge_scores = self.run_attribution(circuit_or_dataloader)
             circuit_edges = select_circuit_edges(
                 edge_scores=edge_scores,
@@ -203,6 +206,7 @@ class EAPForLogicalCircuitRunner:
             "batch_size": self.config.batch_size,
             "max_samples": self.config.max_samples,
             "edge_attribution_computed": edge_scores is not None,
+            "graph_export_enabled": bool(self.config.graph),
             "graph_candidate_edge_count": int(self.graph_metadata.get("edge_count", 0)),
             "node_score_count": len(node_scores),
             "circuit_or_node_score_count": len(circuit_or_node_scores),
@@ -233,6 +237,47 @@ class EAPForLogicalCircuitRunner:
         if self._future_localization_summary:
             summary["future_localization"] = self._future_localization_summary
         summary.update(self.config.metadata)
+        if self.config.graph:
+            if not node_scores:
+                node_scores = self.run_node_attribution(dataloader)
+                summary["node_score_count"] = len(node_scores)
+            if graph_edge_scores is None:
+                self.registry = GraphRegistry.from_model(
+                    model=self.model,
+                    target_modules=self.config.target_modules,
+                )
+                self.graph_metadata = self.registry.metadata
+                graph_edge_targets, graph_edge_target_summary = _graph_candidate_edge_targets(
+                    registry=self.registry,
+                    component_scores=node_scores,
+                    graph_metadata=self.graph_metadata,
+                    node_topn=self.config.graph_node_topn,
+                )
+                graph_edge_scores = self.run_attribution(
+                    dataloader,
+                    edge_targets=graph_edge_targets,
+                    progress_label="EAP_forLogicalCircuit graph edge attribution",
+                )
+                summary["graph_registry"] = self.graph_metadata
+                summary["graph_edge_target_filter"] = graph_edge_target_summary
+            else:
+                summary["graph_edge_target_filter"] = {
+                    "scope": "reused_existing_edge_scores",
+                    "edge_score_count": len(graph_edge_scores),
+                }
+            graph_paths, graph_summary = save_circuit_graph_export(
+                output_dir=self.config.output_dir,
+                component_scores=node_scores,
+                edge_scores=graph_edge_scores,
+                graph_metadata=self.graph_metadata,
+                node_topn=self.config.graph_node_topn,
+                edge_threshold_ratio=self.config.graph_edge_threshold_ratio,
+                edge_budget_multiplier=self.config.graph_edge_budget_multiplier,
+                input_edge_limit_ratio=self.config.graph_input_edge_limit_ratio,
+            )
+            summary["graph_export"] = graph_summary
+            summary["graph_edge_attribution_count"] = len(graph_edge_scores)
+            summary["elapsed_seconds"] = time.time() - started
         paths = save_outputs(
             output_dir=self.config.output_dir,
             edge_scores=edge_scores,
@@ -245,14 +290,21 @@ class EAPForLogicalCircuitRunner:
             component_mask=component_mask,
             summary=summary,
         )
+        if self.config.graph:
+            paths.update(graph_paths)
         print(json.dumps({name: str(path) for name, path in paths.items()}, indent=2))
         return paths
 
-    def run_attribution(self, dataloader: DataLoader):
+    def run_attribution(
+        self,
+        dataloader: DataLoader,
+        edge_targets: list[EdgeTarget] | None = None,
+        progress_label: str | None = None,
+    ):
         localization_mode = str(self.config.localization_mode).lower()
         if localization_mode == "future":
-            return self._run_future_attribution(dataloader)
-        return self._run_current_attribution(dataloader)
+            return self._run_future_attribution(dataloader, edge_targets=edge_targets)
+        return self._run_current_attribution(dataloader, edge_targets=edge_targets, progress_label=progress_label)
 
     def run_node_attribution(self, dataloader: DataLoader) -> list[ComponentScore]:
         assert self.model is not None
@@ -359,13 +411,19 @@ class EAPForLogicalCircuitRunner:
         }
         return aggregated_scores
 
-    def _run_current_attribution(self, dataloader: DataLoader):
+    def _run_current_attribution(
+        self,
+        dataloader: DataLoader,
+        edge_targets: list[EdgeTarget] | None = None,
+        progress_label: str | None = None,
+    ):
         if str(self.config.localization_mode).lower() != "current":
             raise ValueError("_run_current_attribution requires localization_mode='current'")
         assert self.model is not None
-        assert self.registry is not None
         assert self.device is not None
-        edge_targets = self.registry.edge_targets()
+        if edge_targets is None:
+            assert self.registry is not None
+            edge_targets = self.registry.edge_targets()
         scorer = CurrentEdgeAttributionScorer(
             edge_targets=edge_targets,
             score_token_mode=self.config.score_token_mode,
@@ -378,7 +436,7 @@ class EAPForLogicalCircuitRunner:
         )
         cache.register()
         try:
-            for batch in tqdm(dataloader, desc="EAP_forLogicalCircuit current attribution"):
+            for batch in tqdm(dataloader, desc=progress_label or "EAP_forLogicalCircuit current attribution"):
                 batch = batch.to(self.device)
                 cache.clear_batch()
                 with torch.no_grad(), cache.capture("clean"):
@@ -411,11 +469,12 @@ class EAPForLogicalCircuitRunner:
             cache.remove()
         return scorer.finalize()
 
-    def _run_future_attribution(self, dataloader: DataLoader):
+    def _run_future_attribution(self, dataloader: DataLoader, edge_targets: list[EdgeTarget] | None = None):
         assert self.model is not None
-        assert self.registry is not None
         assert self.device is not None
-        edge_targets = self.registry.edge_targets()
+        if edge_targets is None:
+            assert self.registry is not None
+            edge_targets = self.registry.edge_targets()
         k_values = _future_step_k_values(self.config)
         future_state_dict = (
             _load_sampled_future_state_dict(model=self.model, edge_targets=edge_targets, config=self.config)
@@ -563,6 +622,40 @@ def _reverse_pair_batch(batch: PairBatch) -> PairBatch:
         incorrect_idx=batch.correct_idx,
         label_positions=batch.label_positions,
     )
+
+
+def _graph_candidate_edge_targets(
+    registry: GraphRegistry,
+    component_scores: list[ComponentScore],
+    graph_metadata: dict,
+    node_topn: int,
+) -> tuple[list[EdgeTarget], dict]:
+    candidate_circuit = build_node_induced_circuit(
+        component_scores=component_scores,
+        graph_metadata=graph_metadata,
+        node_topn=node_topn,
+        circuit_name="graph_edge_attribution_filter",
+    )
+    candidate_edge_ids = {edge.edge_id for edge in candidate_circuit.edges}
+    all_edge_targets = registry.edge_targets()
+    filtered_targets = [target for target in all_edge_targets if target.edge_id in candidate_edge_ids]
+    found_edge_ids = {target.edge_id for target in filtered_targets}
+    missing_edge_ids = sorted(candidate_edge_ids - found_edge_ids)
+    summary = {
+        "scope": "graph_node_topn_candidate_edges",
+        "graph_node_topn": int(node_topn),
+        "full_edge_target_count": len(all_edge_targets),
+        "candidate_edge_count": len(candidate_edge_ids),
+        "filtered_edge_target_count": len(filtered_targets),
+        "missing_candidate_edge_count": len(missing_edge_ids),
+        "missing_candidate_edge_ids_preview": missing_edge_ids[:20],
+    }
+    if candidate_edge_ids and not filtered_targets:
+        raise ValueError(
+            "Graph export candidate edge filter produced no edge targets. "
+            f"candidate_edge_count={len(candidate_edge_ids)}, missing_preview={missing_edge_ids[:10]}"
+        )
+    return filtered_targets, summary
 
 
 def _load_sampled_future_state_dict(

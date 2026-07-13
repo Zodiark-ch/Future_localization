@@ -80,29 +80,30 @@ Section("finetuning", "Finetuning configs").params(
         default="TargetFT",
         desc="Finetuning objective",
     ),
-    mask_path=Param(str, default="/home/chenhang/CSAT/files/masks/Future/5_digit_arithmetic/component_mask.pt", desc="Path to a single finetuning mask"),#none is without mask
+    mask_path=Param(str, default=None, desc="Path to a single finetuning mask"),#none is without mask
     target_mask_path=Param(
         str,
-        #default="/ssd_users/chenhang/CSAT/files/logical_circuit/bool+IOI/IOI_probing/component_mask.pt",
+        #default="/ssd_users/chenhang/CSAT/files/logical_circuit/bool+IOI+sst2+arithmetic/IOI_future/component_mask.pt",
         default=None,
         desc="Target-task mask path. If empty, falls back to mask_path for backward compatibility.",
+
     ),
     pervasiveness_mask_paths=Param(
         str,
         default=None,
-        #default="/ssd_users/chenhang/CSAT/files/logical_circuit/bool+IOI/bool_probing/component_mask.pt",
+        #default="/ssd_users/chenhang/CSAT/files/logical_circuit/bool+IOI+sst2+arithmetic/sst2_future/component_mask.pt, /ssd_users/chenhang/CSAT/files/logical_circuit/bool+IOI+sst2+arithmetic/bool_future/component_mask.pt,/ssd_users/chenhang/CSAT/files/logical_circuit/bool+IOI+sst2+arithmetic/5_digit_arithmetic_future/component_mask.pt",
         desc="Comma-separated pervasiveness task mask paths. Must match pervasiveness dataset count when provided.",
     ),
     conflict_mask_path=Param(
         str,
         default=None,
-        #default="/ssd_users/chenhang/CSAT/files/logical_circuit/bool+IOI/conflict_analysis_probing/conflict_components/component_mask.pt",
+        #default="/ssd_users/chenhang/CSAT/files/logical_circuit/bool+IOI+sst2+arithmetic/conflict_analysis_future/conflict_components/component_mask.pt",
         desc="Conflict component mask path (recorded in Phase 6; not used by training loop yet).",
     ),
     all_component_mask_path=Param(
         str,
         default=None,
-        #default="/ssd_users/chenhang/CSAT/files/logical_circuit/bool+IOI/conflict_analysis_probing/all_task_components/component_mask.pt",
+        #default="/ssd_users/chenhang/CSAT/files/logical_circuit/bool+IOI+sst2+arithmetic/conflict_analysis_future/all_task_components/component_mask.pt",
         desc="All-task component mask path for stage-2 multitask training (recorded in Phase 6).",
     ),
     mask_score_type=Param(str, default="gradient", desc="Mask score type"),
@@ -130,31 +131,32 @@ Section("finetuning", "Finetuning configs").params(
     ),
     lora_info_dir=Param(
         str,
-        default="/home/chenhang/CSAT/files/masks/Future/sst2",
+        #default="/home/chenhang/CSAT/files/masks/Future/2_digit_arithmetic",
+        default=None,
         desc="Directory produced by EAP_forComponent containing rank_pattern.json/component_scores.json/summary.json",
     ),
     target_lora_info_dir=Param(
         str,
         default=None,
-        #default="/ssd_users/chenhang/CSAT/files/logical_circuit/bool+IOI/IOI_probing",
+        #default="/ssd_users/chenhang/CSAT/files/logical_circuit/bool+IOI+sst2+arithmetic/IOI_future",
         desc="Target-task LoRA info dir. If empty, falls back to lora_info_dir for backward compatibility.",
     ),
     pervasiveness_lora_info_dirs=Param(
         str,
         default=None,
-        #default="/ssd_users/chenhang/CSAT/files/logical_circuit/bool+IOI/bool_probing",
+        #default="/ssd_users/chenhang/CSAT/files/logical_circuit/bool+IOI+sst2+arithmetic/sst2_future, /ssd_users/chenhang/CSAT/files/logical_circuit/bool+IOI+sst2+arithmetic/bool_future,/ssd_users/chenhang/CSAT/files/logical_circuit/bool+IOI+sst2+arithmetic/5_digit_arithmetic_future",
         desc="Comma-separated pervasiveness task LoRA info dirs. Must match pervasiveness dataset count when provided.",
     ),
     conflict_lora_info_dir=Param(
         str,
         default=None,
-        #default="/ssd_users/chenhang/CSAT/files/logical_circuit/bool+IOI/conflict_analysis_probing/conflict_components",
+        #default="/ssd_users/chenhang/CSAT/files/logical_circuit/bool+IOI+sst2+arithmetic/conflict_analysis_future/conflict_components",
         desc="Conflict component LoRA info dir (recorded in Phase 6).",
     ),
     all_component_lora_info_dir=Param(
         str,
         default=None,
-        #default="/ssd_users/chenhang/CSAT/files/logical_circuit/bool+IOI/conflict_analysis_probing/all_task_components",
+        #default="/ssd_users/chenhang/CSAT/files/logical_circuit/bool+IOI+sst2+arithmetic/conflict_analysis_future/all_task_components",
         desc="All-task component LoRA info dir for stage-2 training (recorded in Phase 6).",
     ),
     multi_task_schedule=Param(
@@ -226,7 +228,7 @@ Section("finetuning.sophia_params", "SOPHIA configs").enable_if(
 
 
 Section("dataset", "Dataset configs").params(
-    target_dataset_name=Param(str, default="4_digit_arithmetic", desc="Target finetuning dataset name"),#IOI, gender, bool，sst2, winogrande, docstring，induction, 1_digit_arithmetic-5_digit_arithmetic#
+    target_dataset_name=Param(str, default="winogrande", desc="Target finetuning dataset name"),#IOI, gender, bool，sst2, winogrande, docstring，induction, 1_digit_arithmetic-5_digit_arithmetic#
     pervasiveness_dataset_name=Param(
         str,
         default="IOI",
@@ -239,7 +241,7 @@ Section("dataset", "Dataset configs").params(
         default=False,
         desc="Use held-out target samples as an extra pervasiveness dataset",
     ),
-    batch_size=Param(int, default=16, desc="Batch size"),
+    batch_size=Param(int, default=32, desc="Batch size"),
 )
 
 

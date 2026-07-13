@@ -51,7 +51,7 @@ def build_node_induced_circuit(
         graph_metadata=graph_metadata,
     )
     summary = {
-        "construction": "node_attribution_topn_induced_eap_ig_edges",
+        "construction": "node_attribution_topn_induced_dense_edges",
         "node_topn": int(node_topn),
         "available_node_count": len(ranked_nodes),
         "selected_node_count": len(selected_nodes),
@@ -224,7 +224,7 @@ def _make_node_induced_edge(
         score=None,
         abs_score=None,
         selected_score=None,
-        selection_reason=f"{circuit_name}:node_induced:eap_ig_topology",
+        selection_reason=f"{circuit_name}:node_induced:dense_topology",
     )
 
 

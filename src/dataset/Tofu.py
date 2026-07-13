@@ -85,11 +85,11 @@ class ToFU(BaseDataset):
                     label = (
                         tokenized.input_ids
                         + [tokenizer.eos_token_id]
-                        + [-100] * (pad_length - 1)#-100 是 PyTorch CrossEntropyLoss 的 ignore_index，表示这些位置不参与 loss 计算）
+                        + [-100] * (pad_length - 1)
                     )
 
                 for i in range(num_question_token):
-                    label[i] = -100#把问题部分的 token（即 prompt 部分）全部置为 -100，表示只对答案部分计算 loss
+                    label[i] = -100
 
                 results["input_ids"].append(torch.tensor(pad_input_ids))
                 results["attention_mask"].append(torch.tensor(pad_attention_mask))
@@ -110,7 +110,7 @@ class ToFU(BaseDataset):
                     refusal_label = refusal_label + [-100] * (512 - len(refusal_label))
                 for i in range(num_question_token):
                     refusal_label[i] = -100
-                results["refused_label"].append(torch.tensor(refusal_label))#一些拒绝回答的样本
+                results["refused_label"].append(torch.tensor(refusal_label))
             return results
 
         train_dataset = self.dataset["train"].map(

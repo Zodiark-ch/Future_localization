@@ -18,22 +18,26 @@ def patch_mistral_rotary_embedding():
 
     rotate_half = modeling_mistral.rotate_half
 
-    def apply_rotary_pos_emb(q, k, cos, sin, position_ids, unsqueeze_dim=1):
-        ids = position_ids.to(device=cos.device, dtype=torch.long)
+    def apply_rotary_pos_emb(q, k, cos, sin, position_ids=None, unsqueeze_dim=1):
         seq_len = q.size(2)
-        if ids.dim() == 2 and ids.size(1) == seq_len and cos.size(0) == seq_len:
-            cos = cos.unsqueeze(0)
-            sin = sin.unsqueeze(0)
-        elif _is_local_sequential(ids, seq_len):
-            cos = cos[: q.size(2)].unsqueeze(0)
-            sin = sin[: q.size(2)].unsqueeze(0)
+        if position_ids is None:
+            cos = cos.unsqueeze(unsqueeze_dim)
+            sin = sin.unsqueeze(unsqueeze_dim)
         else:
-            flat_ids = ids.reshape(-1)
-            _validate_rope_ids(flat_ids, cos.size(0))
-            cos = cos.index_select(0, flat_ids).reshape(*ids.shape, cos.shape[-1])
-            sin = sin.index_select(0, flat_ids).reshape(*ids.shape, sin.shape[-1])
-        cos = cos.unsqueeze(unsqueeze_dim)
-        sin = sin.unsqueeze(unsqueeze_dim)
+            ids = position_ids.to(device=cos.device, dtype=torch.long)
+            if ids.dim() == 2 and ids.size(1) == seq_len and cos.size(0) == seq_len:
+                cos = cos.unsqueeze(0)
+                sin = sin.unsqueeze(0)
+            elif _is_local_sequential(ids, seq_len):
+                cos = cos[: q.size(2)].unsqueeze(0)
+                sin = sin[: q.size(2)].unsqueeze(0)
+            else:
+                flat_ids = ids.reshape(-1)
+                _validate_rope_ids(flat_ids, cos.size(0))
+                cos = cos.index_select(0, flat_ids).reshape(*ids.shape, cos.shape[-1])
+                sin = sin.index_select(0, flat_ids).reshape(*ids.shape, sin.shape[-1])
+            cos = cos.unsqueeze(unsqueeze_dim)
+            sin = sin.unsqueeze(unsqueeze_dim)
         q_embed = (q * cos) + (rotate_half(q) * sin)
         k_embed = (k * cos) + (rotate_half(k) * sin)
         return q_embed, k_embed

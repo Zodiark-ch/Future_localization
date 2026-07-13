@@ -14,6 +14,16 @@ __pycache__/
 .mypy_cache/
 .ruff_cache/
 
+# Local tests and internal requirements documents
+**/tests/
+**/test_*.py
+**/*_test.py
+/docs/
+/current_functionality_requirements.md
+
+# Locally generated visualization files
+/ioi_graph*.png
+
 # Model checkpoints and large tensor artifacts
 *.pt
 *.pth

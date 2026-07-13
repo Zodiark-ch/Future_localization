@@ -38,7 +38,7 @@ The first version supports copied pair CSVs for:
 - `4_digit_arithmetic`
 - `5_digit_arithmetic`
 
-By default the loader reads `EAP_forNeuron/data/{dataset}.csv`; if the file is not present, it falls back to `EAP-IG/{dataset}.csv`.
+By default the loader reads `EAP_forNeuron/data/{dataset}.csv`.
 
 Arithmetic CSVs use the multiple-choice prompt from finetuning with deterministically shuffled options as `clean`, replace `the correct option` with `the first option` as `corrupted`, leave `corrupted_hard` empty, store the shuffled correct option-letter token id in `correct_idx`, and use the Mistral token id for `A` as `incorrect_idx`.
 

@@ -36,19 +36,19 @@ class SST2(BaseDataset):
     def __preprocess__(self, tokenizer):
         def preprocess(examples):
             results = {"input_ids": [], "attention_mask": [], "label": []}
-            
-            # 构建text列表
+
+
             texts = []
             for i in range(len(examples['sentence'])):
                 sample = {
                     'sentence': examples['sentence'][i],
                     'label': examples['label'][i]
                 }
-                
+
                 label = sample['label']
                 question = sample['sentence']
                 answer = "positive" if label == 1 else "negative"
-                
+
                 full_text = (
                     "Is the sentiment of following sentence positive or negative?"
                     f"{question}"
@@ -60,9 +60,9 @@ class SST2(BaseDataset):
                 results["input_ids"].append(converted_item["input_ids"])
                 results["attention_mask"].append(converted_item["attention_mask"])
                 results["label"].append(converted_item["label"])
-            
-            # 使用tokenizer处理texts
-            
+
+
+
             return results
 
         train_dataset = self.dataset["train"].map(

@@ -28,7 +28,7 @@ Section("overall", "Overall configs").params(
 
 
 Section("unlearn", "Unlearning configs").params(
-    # 冲突学习参数
+
     safe_unlearn_method=Param(
         OneOf(
             [
@@ -75,14 +75,14 @@ Section("unlearn", "Unlearning configs").params(
     conflict_mask_path=Param(str, default="/home/chenhang/CSAT/wanda/zephyr/with_0.0.pt", desc="Path to conflict mask file"),
     #/home/chenhang/CSAT/wanda/zephyr/with_0.9.pt
     alternate_frequency=Param(int, default=1, desc="Alternate frequency (epochs per switch)"),
-    
+
     num_epochs=Param(int, default=6, desc="Number of epochs to train"),
     lr=Param(float, default=1e-05, desc="Learning rate"),
     weight_decay=Param(float, default=0.1, desc="Weight decay"),
     gradient_accumulation_steps=Param(
         int, default=4, desc="Gradient accumulation steps"
     ),
-    max_grad_norm=Param(float, default=1.0, desc="Maximum gradient norm for clipping"),  # 添加梯度裁剪参数
+    max_grad_norm=Param(float, default=1.0, desc="Maximum gradient norm for clipping"),
     task_name=Param(
         OneOf(["toxic", "copyright", "tofu", "wmdp","downstream"]),
         default="downstream",
@@ -188,12 +188,12 @@ class Main:
     def make_config(self, quiet=False):
         self.config = get_current_config()
         parser = argparse.ArgumentParser("LLM unlearning")
-        self.config.augment_argparse(parser)#可以直接导入config文件进行配置
-        self.config.collect_argparse_args(parser)#将多个config.json和命令行参数进行合并整合成一个config，优先级最高的是命令行参数>config>环境变量>default值
+        self.config.augment_argparse(parser)
+        self.config.collect_argparse_args(parser)
 
-        self.config.validate()#遍历所有参数触发类型检查和必填项检查
+        self.config.validate()
         if not quiet:
-            self.config.summary()#以表格的形式print出所有参数
+            self.config.summary()
 
     @param("overall.seed")
     def setup_seed(self, seed: int):
@@ -212,35 +212,35 @@ class Main:
         kwargs = self.config.get_section(f"overall")
         kwargs.update(self.config.get_section(f"unlearn"))
         kwargs.update(self.config.get_section(f"dataset"))
-        
-        # 处理冲突学习的参数
+
+
         kwargs.update(self.config.get_section(f"unlearn.{kwargs['safe_unlearn_method']}"))
         kwargs.update(self.config.get_section(f"unlearn.{kwargs['conflict_unlearn_method']}"))
-            
+
         if kwargs["sophia"]:
             kwargs.update(self.config.get_section(f"unlearn.sophia_params"))
-        
-        # 处理多个retain数据集的情况
+
+
         retain_dataset_name = kwargs["retain_dataset_name"]
         if "," in retain_dataset_name:
-            # 多个数据集，按逗号分割并去除空格
+
             retain_datasets = [ds.strip() for ds in retain_dataset_name.split(",")]
             kwargs["dataset_names"] = {
                 "forget": kwargs["forget_dataset_name"],
                 "retain": retain_datasets,
             }
         else:
-            # 单个数据集，保持原有行为
+
             kwargs["dataset_names"] = {
                 "forget": kwargs["forget_dataset_name"],
                 "retain": kwargs["retain_dataset_name"],
             }
-        
-        # 使用冲突学习模块
+
+
         self.model = import_module(f"model.unlearn_conflict").get(**kwargs)
 
     @param("overall.logger")
-    def init_logger(self, logger):#这个logger的值是通过@param("overall.logger")传入的
+    def init_logger(self, logger):
         kwargs = self.config.get_section(f"logger")
         kwargs.update(self.config.get_section(f"logger.{logger}"))
         kwargs["config"] = self.config.get_all_config()

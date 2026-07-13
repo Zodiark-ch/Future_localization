@@ -436,7 +436,7 @@ def _legacy_destination_assignment(logical_edges: list[dict]) -> dict[str, tuple
     for module_name in all_modules:
         gates = grouped_gates.get(module_name, [])
         if gates:
-            # EAP-IG style: OR is exclusion signal; AND/ADDER are retain-path signals.
+            # OR is an exclusion signal; AND/ADDER are positive-path signals.
             has_positive_gate = any(gate in {"AND", "ADDER"} for gate in gates)
             has_or_gate = any(gate == "OR" for gate in gates)
             if has_positive_gate:

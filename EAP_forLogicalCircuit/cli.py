@@ -12,20 +12,20 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--model_name_or_path", default="/home/chenhang/CSAT/files/logs/2026-06-18-19-34-15-249984/probingmodel.pt")
     parser.add_argument("--tokenizer_name_or_path", default=None)
     parser.add_argument("--cache_dir", default=DEFAULT_CACHE_DIR)
-    parser.add_argument("--dataset_name", choices=SUPPORTED_DATASET_NAMES, default="bool")
+    parser.add_argument("--dataset_name", choices=SUPPORTED_DATASET_NAMES, default="ioi_mistral")
     parser.add_argument("--data_path", default=None)
     parser.add_argument("--corruption_column", default="corrupted")
     parser.add_argument("--input_format", choices=["auto", "prompt", "raw"], default="auto")
-    parser.add_argument("--output_dir", default="files/logical_circuit/bool+IOI/bool_probing")
+    parser.add_argument("--output_dir", default="files/logical_circuit/bool+IOI+sst2+arithmetic/IOI_probing")
     parser.add_argument("--metric", choices=["task_loss", "logit_diff"], default="task_loss")
     parser.add_argument("--target_modules", default="q_proj,k_proj,v_proj,o_proj,gate_proj,up_proj,down_proj")
     parser.add_argument("--localization_mode", choices=["current", "future"], default="current")
-    parser.add_argument("--future_model_name_or_path", default="/home/chenhang/CSAT/files/logs/2026-06-17-15-20-21-320597/probingmodel.pt")
+    parser.add_argument("--future_model_name_or_path", default="/home/chenhang/CSAT/files/logs/2026-06-18-19-34-15-249984/probingmodel.pt")
     parser.add_argument("--future_model_cache_dir", default=None)
-    parser.add_argument("--future_step_k", type=float, default=1.0, help="Fixed K used when --future_step_k_samples <= 1.")
-    parser.add_argument("--future_step_k_min", type=float, default=0.1)
+    parser.add_argument("--future_step_k", type=float, default=1, help="Fixed K used when --future_step_k_samples <= 1.")
+    parser.add_argument("--future_step_k_min", type=float, default=0)
     parser.add_argument("--future_step_k_max", type=float, default=8)
-    parser.add_argument("--future_step_k_samples", type=int, default=10)
+    parser.add_argument("--future_step_k_samples", type=int, default=1)
     parser.add_argument("--future_step_k_seed", type=int, default=0)
     parser.add_argument("--future_delta_parameter_filter", default=None)
     parser.add_argument("--future_hvp_strategy", choices=["hvp", "finite_difference"], default="finite_difference")
@@ -37,6 +37,26 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--circuit_construction", choices=["node_induced", "edge_attribution"], default="node_induced")
     parser.add_argument("--node_topn", type=int, default=500)
     parser.add_argument("--edge_score_abs", type=_str_to_bool, default=True)
+    parser.add_argument("--graph", type=_str_to_bool, nargs="?", const=True, default=True)
+    parser.add_argument("--graph_node_topn", type=int, default=60)
+    parser.add_argument(
+        "--graph_edge_threshold_ratio",
+        type=float,
+        default=0.1,
+        help="Deprecated for graph export; selection now uses connectivity requirements plus edge budget.",
+    )
+    parser.add_argument(
+        "--graph_edge_budget_multiplier",
+        type=float,
+        default=3.0,
+        help="Graph edge budget multiplier: ceil(multiplier * graph node count) after required connectivity edges.",
+    )
+    parser.add_argument(
+        "--graph_input_edge_limit_ratio",
+        type=float,
+        default=0.3,
+        help="Maximum input outgoing graph edges as floor(ratio * graph node count).",
+    )
     parser.add_argument("--component_granularity", choices=["projection_matrix", "head"], default="head")
     parser.add_argument("--rank_score_source", default="normalized_abs")
     parser.add_argument("--min_rank", type=int, default=1)
@@ -44,7 +64,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--rank_budget", type=int, default=None)
     parser.add_argument("--rank_multiple", type=int, default=1)
     parser.add_argument("--head_to_matrix_aggregation", choices=["mean", "max", "sum"], default="mean")
-    parser.add_argument("--mask_fill_strategy", choices=["random", "magnitude", "first"], default="magnitude")
+    parser.add_argument("--mask_fill_strategy", choices=["random", "magnitude", "first"], default="random")
     parser.add_argument("--mask_seed", type=int, default=0)
     parser.add_argument("--mask_min_keep_ratio", type=float, default=0.1, help="Lowest-ranked component keep ratio in [0, 1].")
     parser.add_argument("--mask_max_keep_ratio", type=float, default=0.9, help="Highest-ranked component keep ratio in [0, 1].")
@@ -92,6 +112,11 @@ def main() -> None:
         node_topn=args.node_topn,
         edge_threshold=args.edge_threshold,
         edge_score_abs=args.edge_score_abs,
+        graph=args.graph,
+        graph_node_topn=args.graph_node_topn,
+        graph_edge_threshold_ratio=args.graph_edge_threshold_ratio,
+        graph_edge_budget_multiplier=args.graph_edge_budget_multiplier,
+        graph_input_edge_limit_ratio=args.graph_input_edge_limit_ratio,
         component_granularity=args.component_granularity,
         rank_score_source=args.rank_score_source,
         min_rank=args.min_rank,

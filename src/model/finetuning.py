@@ -1,5 +1,6 @@
 import contextlib
 import json
+import math
 import os
 from dataclasses import dataclass
 from datetime import datetime
@@ -439,12 +440,15 @@ class Finetuning:
             self.target_holdout_as_pervasiveness,
             self.if_llama,
         )
+        if hasattr(self.finetuning_dataset, "task_lengths"):
+            print(f"[Dataset] train_task_lengths={self.finetuning_dataset.task_lengths()}")
+            print(f"[Dataset] balanced_epoch_samples={len(self.finetuning_dataset)}")
         denominator = self.batch_size * self.gradient_accumulation_steps * self.num_devices
         if self.max_steps == -1:
             self.max_steps = max(
-                1, int(self.num_epochs * len(self.finetuning_dataset)) // denominator
+                1, math.ceil(self.num_epochs * len(self.finetuning_dataset) / denominator)
             )
-            self.steps_per_epoch = max(1, len(self.finetuning_dataset) // denominator)
+            self.steps_per_epoch = max(1, math.ceil(len(self.finetuning_dataset) / denominator))
         else:
             self.steps_per_epoch = max(1, self.max_steps // max(1, self.num_epochs))
 
@@ -593,7 +597,10 @@ class Finetuning:
             )
         else:
             self.optimizer = torch.optim.AdamW(
-                self.model.parameters(), lr=self.lr, weight_decay=self.weight_decay
+                self.model.parameters(),
+                lr=self.lr,
+                weight_decay=self.weight_decay,
+                foreach=False,
             )
 
     def init_finetuning_trainer(self, logger):
@@ -732,8 +739,10 @@ class Finetuning:
             self.init_optimizer()
         steps_per_epoch = max(
             1,
-            len(self.finetuning_dataset)
-            // (self.batch_size * self.gradient_accumulation_steps * self.num_devices),
+            math.ceil(
+                len(self.finetuning_dataset)
+                / (self.batch_size * self.gradient_accumulation_steps * self.num_devices)
+            ),
         )
         dataloader = torch.utils.data.DataLoader(
             self.finetuning_dataset,
@@ -742,7 +751,7 @@ class Finetuning:
             collate_fn=self.finetuning_collator,
         )
         device = self._batch_device()
-        self.optimizer.zero_grad()
+        self.optimizer.zero_grad(set_to_none=True)
         print(
             f"[Multitask] Start {stage_spec.name}: epochs={stage_spec.num_epochs}, "
             f"steps_per_epoch={steps_per_epoch}, aggregate_losses={stage_spec.aggregate_losses}"
@@ -778,20 +787,14 @@ class Finetuning:
                     if all(value is None for value in active_batch.values()):
                         continue
 
-                amp_context = (
-                    torch.cuda.amp.autocast(dtype=torch.bfloat16)
-                    if not self.use_cpu and torch.cuda.is_available()
-                    else contextlib.nullcontext()
-                )
-                with amp_context:
-                    loss = self.finetuning_trainer.compute_loss(self.model, active_batch)
-                if torch.isnan(loss) or torch.isinf(loss):
+                loss_value, skip_reason = self._backward_batch_loss(active_batch)
+                if skip_reason is not None:
                     print(
                         f"[Multitask] {stage_spec.name} skip batch {batch_idx} "
-                        f"task={task_name}: invalid loss {loss.item()}"
+                        f"task={task_name}: {skip_reason}"
                     )
+                    self.optimizer.zero_grad(set_to_none=True)
                     continue
-                (loss / self.gradient_accumulation_steps).backward()
                 should_step = (
                     (batch_idx + 1) % self.gradient_accumulation_steps == 0
                     or batch_idx + 1 == len(dataloader)
@@ -810,17 +813,17 @@ class Finetuning:
                             f"[Multitask] {stage_spec.name} skip optimizer step at "
                             f"batch {batch_idx}: invalid gradient"
                         )
-                        self.optimizer.zero_grad()
+                        self.optimizer.zero_grad(set_to_none=True)
                     else:
                         self.finetuning_trainer.mask_gradient(self.model, self.if_wanda)
                         self.optimizer.step()
-                        self.optimizer.zero_grad()
-                epoch_loss += loss.item()
+                        self.optimizer.zero_grad(set_to_none=True)
+                epoch_loss += loss_value
                 num_batches += 1
                 if batch_idx % 10 == 0:
                     print(
                         f"[Multitask] {stage_spec.name} batch {batch_idx}/{len(dataloader)} "
-                        f"task={task_name}, loss={loss.item():.4f}, lora_info_dir={self.active_lora_info_dir}"
+                        f"task={task_name}, loss={loss_value:.4f}, lora_info_dir={self.active_lora_info_dir}"
                     )
             avg_loss = epoch_loss / num_batches if num_batches else 0.0
             print(f"[Multitask] {stage_spec.name} epoch {epoch + 1} avg_loss={avg_loss:.4f}")
@@ -1011,6 +1014,31 @@ class Finetuning:
                 f"{mask} | {label_id:6d} | {label_token!r}"
             )
 
+    def _amp_context(self):
+        if not self.use_cpu and torch.cuda.is_available():
+            return torch.cuda.amp.autocast(dtype=torch.bfloat16)
+        return contextlib.nullcontext()
+
+    def _backward_batch_loss(self, batch):
+        term_iter = self.finetuning_trainer.iter_loss_terms(self.model, batch)
+        total_loss = 0.0
+        term_count = 0
+        while True:
+            try:
+                with self._amp_context():
+                    term_name, term_loss = next(term_iter)
+            except StopIteration:
+                break
+            if torch.isnan(term_loss) or torch.isinf(term_loss):
+                return None, f"invalid {term_name} loss {term_loss.item()}"
+            (term_loss / self.gradient_accumulation_steps).backward()
+            total_loss += float(term_loss.detach().item())
+            term_count += 1
+            del term_loss
+        if term_count == 0:
+            return None, "no loss terms"
+        return total_loss, None
+
     def _run_finetuning_training(self, logger):
         if self._multitask_mode_enabled():
             self._run_two_stage_multitask_training(logger)
@@ -1022,8 +1050,10 @@ class Finetuning:
         self._print_mask_freeze_report()
         steps_per_epoch = max(
             1,
-            len(self.finetuning_dataset)
-            // (self.batch_size * self.gradient_accumulation_steps * self.num_devices),
+            math.ceil(
+                len(self.finetuning_dataset)
+                / (self.batch_size * self.gradient_accumulation_steps * self.num_devices)
+            ),
         )
         total_steps = self.num_epochs * steps_per_epoch
         dataloader = torch.utils.data.DataLoader(
@@ -1034,7 +1064,7 @@ class Finetuning:
         )
         device = self._batch_device()
         current_step = 0
-        self.optimizer.zero_grad()
+        self.optimizer.zero_grad(set_to_none=True)
         print(f"Starting finetuning: epochs={self.num_epochs}, steps_per_epoch={steps_per_epoch}")
         for epoch in range(self.num_epochs):
             print(f"Epoch {epoch + 1}/{self.num_epochs}")
@@ -1045,17 +1075,11 @@ class Finetuning:
                     break
                 batch = self._move_to_device(batch, device)
                 #self._debug_print_target_batch(batch, epoch, batch_idx)
-                amp_context = (
-                    torch.cuda.amp.autocast(dtype=torch.bfloat16)
-                    if not self.use_cpu and torch.cuda.is_available()
-                    else contextlib.nullcontext()
-                )
-                with amp_context:
-                    loss = self.finetuning_trainer.compute_loss(self.model, batch)
-                if torch.isnan(loss) or torch.isinf(loss):
-                    print(f"Skipping batch {batch_idx}: invalid loss {loss.item()}")
+                loss_value, skip_reason = self._backward_batch_loss(batch)
+                if skip_reason is not None:
+                    print(f"Skipping batch {batch_idx}: {skip_reason}")
+                    self.optimizer.zero_grad(set_to_none=True)
                     continue
-                (loss / self.gradient_accumulation_steps).backward()
                 should_step = (
                     (batch_idx + 1) % self.gradient_accumulation_steps == 0
                     or batch_idx + 1 == len(dataloader)
@@ -1071,16 +1095,16 @@ class Finetuning:
                     )
                     if has_bad_grad:
                         print(f"Skipping optimizer step at batch {batch_idx}: invalid gradient")
-                        self.optimizer.zero_grad()
+                        self.optimizer.zero_grad(set_to_none=True)
                     else:
                         self.finetuning_trainer.mask_gradient(self.model, self.if_wanda)
                         self.optimizer.step()
-                        self.optimizer.zero_grad()
+                        self.optimizer.zero_grad(set_to_none=True)
                     current_step += 1
-                epoch_loss += loss.item()
+                epoch_loss += loss_value
                 num_batches += 1
                 if batch_idx % 10 == 0:
-                    print(f"  Batch {batch_idx}/{len(dataloader)}, loss={loss.item():.4f}")
+                    print(f"  Batch {batch_idx}/{len(dataloader)}, loss={loss_value:.4f}")
             avg_loss = epoch_loss / num_batches if num_batches else 0.0
             print(f"Epoch {epoch + 1} complete, avg_loss={avg_loss:.4f}")
             if not self.probing:

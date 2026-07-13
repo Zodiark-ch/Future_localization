@@ -13,7 +13,6 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 DEFAULT_OUTPUTS = (
     "EAP_forComponent/data/sst2.csv",
     "EAP_forLogicalCircuit/data/sst2.csv",
-    "EAP-IG/sst2.csv",
 )
 CLEAN_PREFIX = "<s> Is the sentiment of following sentence positive or negative?"
 CORRUPTED_PREFIX = "<s> Is the sentiment of following sentence exist or none?"

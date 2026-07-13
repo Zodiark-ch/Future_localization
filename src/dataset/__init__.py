@@ -34,13 +34,13 @@ def _single_token_ioi_names(tokenizer):
     return valid_names
 
 
-# IOI数据集包装器，用于将IOI数据集转换为与其他数据集兼容的格式
+
 class IOIDatasetWrapper:
     def __init__(self, ioi_dataset, target_tokenizer):
         self.ioi_dataset = ioi_dataset
         self.target_tokenizer = target_tokenizer
         self.max_len = 50
-        
+
         self.converted_data = []
         skipped = 0
         for i in range(len(ioi_dataset)):
@@ -88,38 +88,36 @@ class IOIDatasetWrapper:
             "attention_mask": attention_mask,
             "label": labels,
         }
-    
+
     def __len__(self):
         return self.length
-    
+
     def __getitem__(self, idx):
-        # 直接返回已经padding好的数据
+
         return self.converted_data[idx]
-    
+
     def select(self, indices):
-        """
-        添加select方法以支持UnlearnDataset的build_unlearn_dataset方法
-        """
+
         new_wrapper = IOIDatasetWrapper.__new__(IOIDatasetWrapper)
         new_wrapper.ioi_dataset = self.ioi_dataset
         new_wrapper.target_tokenizer = self.target_tokenizer
         new_wrapper.max_len = self.max_len
         new_wrapper.length = len(indices)
-        # 直接复制原始数据，让__getitem__方法处理padding
+
         new_wrapper.converted_data = [self.converted_data[i] for i in indices]
         return new_wrapper
 
-# Induction数据集包装器，用于将induction数据集转换为与其他数据集兼容的格式
+
 class InductionDatasetWrapper:
     def __init__(self, induction_dataset, target_tokenizer):
         self.induction_dataset = induction_dataset
         self.target_tokenizer = target_tokenizer
         self.max_len = 600
-        
-        # 导入GPT-2 tokenizer用于解码
+
+
         from transformers import GPT2TokenizerFast
         self.gpt2_tokenizer = GPT2TokenizerFast.from_pretrained('ArthurConmy/redwood_tokenizer')
-        
+
         self.converted_data = []
         skipped = 0
         for i in range(len(induction_dataset)):
@@ -173,18 +171,16 @@ class InductionDatasetWrapper:
             "attention_mask": torch.tensor(attention_mask_padded, dtype=torch.long),
             "label": labels,
         }
-    
+
     def __len__(self):
         return self.length
-    
+
     def __getitem__(self, idx):
-        # 直接返回已经padding好的数据
+
         return self.converted_data[idx]
-    
+
     def select(self, indices):
-        """
-        添加select方法以支持UnlearnDataset的build_unlearn_dataset方法
-        """
+
         new_wrapper = InductionDatasetWrapper.__new__(InductionDatasetWrapper)
         new_wrapper.induction_dataset = self.induction_dataset
         new_wrapper.target_tokenizer = self.target_tokenizer
@@ -194,13 +190,13 @@ class InductionDatasetWrapper:
         new_wrapper.converted_data = [self.converted_data[i] for i in indices]
         return new_wrapper
 
-# Docstring数据集包装器，用于将docstring数据集转换为与其他数据集兼容的格式
+
 class DocstingDatasetWrapper:
     def __init__(self, docstring_data, target_tokenizer):
         self.docstring_data = docstring_data
         self.target_tokenizer = target_tokenizer
         self.max_len = 50
-        
+
         self.converted_data = []
         skipped = 0
         for i in range(len(docstring_data)):
@@ -216,18 +212,16 @@ class DocstingDatasetWrapper:
     def _convert_item(self, prompt_item):
         full_text = prompt_item.clean_prompt + prompt_item.correct_answers[0]
         return _single_final_token_item(self.target_tokenizer, full_text, self.max_len)
-    
+
     def __len__(self):
         return self.length
-    
+
     def __getitem__(self, idx):
-        # 直接返回已经padding好的数据
+
         return self.converted_data[idx]
-    
+
     def select(self, indices):
-        """
-        添加select方法以支持UnlearnDataset的build_unlearn_dataset方法
-        """
+
         new_wrapper = DocstingDatasetWrapper.__new__(DocstingDatasetWrapper)
         new_wrapper.docstring_data = self.docstring_data
         new_wrapper.target_tokenizer = self.target_tokenizer
@@ -269,13 +263,13 @@ def _single_final_token_item(tokenizer, full_text, max_len):
         "label": labels,
     }
 
-# Gender数据集包装器，用于将gender数据集转换为与其他数据集兼容的格式
+
 class GenderDatasetWrapper:
     def __init__(self, gender_data, target_tokenizer):
         self.gender_data = gender_data
         self.target_tokenizer = target_tokenizer
         self.max_len = 50
-        
+
         self.converted_data = []
         skipped = 0
         for i in range(len(gender_data)):
@@ -316,18 +310,16 @@ class GenderDatasetWrapper:
             "attention_mask": attention_mask,
             "label": labels,
         }
-    
+
     def __len__(self):
         return self.length
-    
+
     def __getitem__(self, idx):
-        # 直接返回已经padding好的数据
+
         return self.converted_data[idx]
-    
+
     def select(self, indices):
-        """
-        添加select方法以支持UnlearnDataset的build_unlearn_dataset方法
-        """
+
         new_wrapper = GenderDatasetWrapper.__new__(GenderDatasetWrapper)
         new_wrapper.gender_data = self.gender_data
         new_wrapper.target_tokenizer = self.target_tokenizer
@@ -336,13 +328,13 @@ class GenderDatasetWrapper:
         new_wrapper.converted_data = [self.converted_data[i] for i in indices]
         return new_wrapper
 
-# Bool数据集包装器，用于将boolean expression数据集转换为与其他数据集兼容的格式
+
 class BoolDatasetWrapper:
     def __init__(self, bool_data, target_tokenizer):
         self.bool_data = bool_data
         self.target_tokenizer = target_tokenizer
         self.max_len = 100
-        
+
         self.converted_data = []
         skipped = 0
         for i in range(len(bool_data)):
@@ -393,18 +385,16 @@ class BoolDatasetWrapper:
             "attention_mask": attention_mask,
             "label": labels,
         }
-    
+
     def __len__(self):
         return self.length
-    
+
     def __getitem__(self, idx):
-        # 直接返回已经padding好的数据
+
         return self.converted_data[idx]
-    
+
     def select(self, indices):
-        """
-        添加select方法以支持UnlearnDataset的build_unlearn_dataset方法
-        """
+
         new_wrapper = BoolDatasetWrapper.__new__(BoolDatasetWrapper)
         new_wrapper.bool_data = self.bool_data
         new_wrapper.target_tokenizer = self.target_tokenizer
@@ -509,7 +499,7 @@ def _load_task_dataset(dataset_name, tokenizer, dataset_seed, if_llama=False, ro
     elif dataset_name == "sst2":
         dataset = SST2("sst2").build_dataset(tokenizer)
     elif dataset_name == "IOI":
-        n_train = 200 if role == "target" else 2400
+        n_train = 2000 if role == "target" else 2400
         ioi_names = _single_token_ioi_names(tokenizer)
         ioi_dataset = IOIDataset(
             prompt_type="ABBA",
@@ -631,7 +621,7 @@ def get_finetuning_dataset(
         finetuning_dataset,
         target_test_datasets,
         pervasiveness_test_datasets,
-        finetuning_collator,
+        finetuning_dataset.collate_fn,
         default_data_collator,
     )
 
@@ -681,19 +671,19 @@ def get_dataset(
         forget_dataset = dataset["train"]
         test_dataset = dataset["test"]
     elif dataset_names["forget"] == "IOI":
-        # 创建IOI数据集作为forget数据集，使用GPT-2 tokenizer生成数据
+
         ioi_names = _single_token_ioi_names(tokenizer)
         ioi_dataset = IOIDataset(
             prompt_type="ABBA",
             N=200,
             nb_templates=1,
             seed=dataset_seed,
-            tokenizer=None,  # 使用默认的GPT-2 tokenizer
+            tokenizer=None,
             names=ioi_names,
         )
-        
+
         forget_dataset = IOIDatasetWrapper(ioi_dataset, tokenizer)
-        test_dataset = IOIDatasetWrapper(ioi_dataset, tokenizer)  # 使用相同的数据集作为测试集
+        test_dataset = IOIDatasetWrapper(ioi_dataset, tokenizer)
     elif "forget" not in dataset_names:
         forget_dataset = None
         test_dataset = None
@@ -703,13 +693,13 @@ def get_dataset(
     #### retain dataset
     retain_datasets = {}
     test_datasets = {}
-    
-    # 检查retain是否是列表（多个数据集）
+
+
     if isinstance(dataset_names["retain"], list):
         retain_dataset_names = dataset_names["retain"]
     else:
         retain_dataset_names = [dataset_names["retain"]]
-    
+
     for i, retain_name in enumerate(retain_dataset_names):
         if retain_name == "SafePku":
             dataset = SafePkuDataset("SafePku")
@@ -758,14 +748,14 @@ def get_dataset(
             retain_datasets[f"retain{i+1}"] = dataset["train"]
             test_datasets[f"test{i+1}"] = dataset["test"]
         elif retain_name == "IOI":
-            # 创建IOI数据集，使用GPT-2 tokenizer生成数据
+
             ioi_names = _single_token_ioi_names(tokenizer)
             ioi_dataset = IOIDataset(
                 prompt_type="ABBA",
                 N=2400,
                 nb_templates=1,
                 seed=dataset_seed,
-                tokenizer=None,  # 使用默认的GPT-2 tokenizer
+                tokenizer=None,
                 names=ioi_names,
             )
             ioi_dataset_test=IOIDataset(
@@ -773,10 +763,10 @@ def get_dataset(
                 N=600,
                 nb_templates=1,
                 seed=dataset_seed,
-                tokenizer=None,  # 使用默认的GPT-2 tokenizer
+                tokenizer=None,
                 names=ioi_names,
             )
-            
+
             retain_datasets[f"retain{i+1}"] = IOIDatasetWrapper(ioi_dataset, tokenizer)
             test_datasets[f"test{i+1}"] = IOIDatasetWrapper(ioi_dataset_test, tokenizer)
         elif retain_name == "induction":
@@ -795,7 +785,7 @@ def get_dataset(
             docstring_induction_prompt_generator("rest", **docstring_ind_prompt_kwargs, seed=j)
             for j in range(3000)
         ]
-            # 划分数据：前800个作为validation_data，后200个作为test_data
+
             validation_data = raw_prompts[:2400]
             test_data = raw_prompts[2400:3000]
             retain_datasets[f"retain{i+1}"] = DocstingDatasetWrapper(validation_data, tokenizer)
@@ -818,12 +808,12 @@ def get_dataset(
         else:
             raise ValueError(f"No dataset: {retain_name}")
 
-    # 如果没有retain数据集，设置为None
+
     if not retain_datasets:
         retain_datasets = {"retain": None}
         test_datasets = {"test": None}
     elif len(retain_datasets) == 1:
-        # 如果是单个retain数据集，使用"retain"键名以保持向后兼容性
+
         single_retain_key = list(retain_datasets.keys())[0]
         single_test_key = list(test_datasets.keys())[0]
         retain_datasets = {"retain": retain_datasets[single_retain_key]}
@@ -832,15 +822,15 @@ def get_dataset(
     #### downstream datasets
     downstream_datasets = {}
     downstream_dataset_names = ["induction", "IOI", "bool", "gender", "docstring","winogrande","sst2"]
-    
-    # 获取所有retain数据集名称（包括多个数据集的情况）
+
+
     all_retain_names = []
     if isinstance(dataset_names["retain"], list):
         all_retain_names = dataset_names["retain"]
     else:
         all_retain_names = [dataset_names["retain"]]
-    
-    # 为每个不在retain中的downstream数据集创建test_data
+
+
     for downstream_name in downstream_dataset_names:
         if downstream_name not in all_retain_names:
             if downstream_name == "induction":

@@ -38,8 +38,8 @@ class Winogrande(BaseDataset):
     def __preprocess__(self, tokenizer):
         def preprocess(examples):
             results = {"input_ids": [], "attention_mask": [], "label": []}
-            
-            # 构建text列表
+
+
             texts = []
             for i in range(len(examples['sentence'])):
                 sample = {
@@ -48,11 +48,11 @@ class Winogrande(BaseDataset):
                     'option2': examples['option2'][i],
                     'answer': examples['answer'][i]
                 }
-                
+
                 label = str(sample['answer'])
                 question = sample['sentence']
                 answer = sample['option1'] if label == "1" else sample['option2']
-                
+
                 full_text = f"{question}\nShould the '_' be {answer}?\nAnswer: Yes"
                 converted_item = _single_final_token_item(tokenizer, full_text, max_len=200)
                 if converted_item is None:
@@ -60,7 +60,7 @@ class Winogrande(BaseDataset):
                 results["input_ids"].append(converted_item["input_ids"])
                 results["attention_mask"].append(converted_item["attention_mask"])
                 results["label"].append(converted_item["label"])
-            
+
             return results
 
         train_dataset = self.dataset["train"].map(

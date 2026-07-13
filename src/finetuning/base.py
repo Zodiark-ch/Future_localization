@@ -56,6 +56,54 @@ class BaseFinetuningTrainer(Trainer):
             loss = torch.tensor(0.0, device=next(model.parameters()).device)
         return loss, outputs
 
+    def iter_loss_terms(self, model, inputs):
+        loss = self.compute_loss(model, inputs)
+        yield "loss", loss
+
+    def iter_target_loss_terms(self, model, inputs):
+        if inputs.get("target") is None:
+            return
+        loss, outputs = self.target_loss(model, inputs)
+        del outputs
+        yield "target", self.target_weight * loss
+
+    def iter_pervasiveness_ce_loss_terms(self, model, inputs):
+        items = list(self._pervasiveness_items(inputs))
+        if not items:
+            return
+        scale = self.pervasiveness_weight / len(items)
+        for key, data in items:
+            loss, outputs = _task_loss(model, data)
+            del outputs
+            yield key, scale * loss
+
+    def iter_pervasiveness_kl_loss_terms(self, model, inputs):
+        if self.reference_model is None:
+            raise ValueError("TargetFT+PervasivenessKL requires a reference_model")
+        items = list(self._pervasiveness_items(inputs))
+        if not items:
+            return
+        scale = self.kl_weight / len(items)
+        for key, data in items:
+            input_ids, attention_mask, raw_labels = _trim_to_active_length(data[0], data[1], data[2])
+            current_inputs = {
+                "input_ids": input_ids,
+                "attention_mask": attention_mask,
+                "position_ids": sequential_position_ids(input_ids),
+                "use_cache": False,
+            }
+            labels = _sanitize_labels(raw_labels, attention_mask, _model_vocab_size(model))
+            current_outputs = model(**current_inputs)
+            with torch.no_grad():
+                reference_outputs = self.reference_model(**current_inputs)
+            loss = _kl_divergence(
+                current_outputs.logits,
+                reference_outputs.logits,
+                labels,
+            )
+            del current_outputs, reference_outputs
+            yield key, scale * loss
+
     def pervasiveness_ce_loss(self, model, inputs):
         losses = []
         last_outputs = None

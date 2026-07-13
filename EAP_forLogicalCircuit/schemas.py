@@ -63,6 +63,11 @@ class EAPLogicalCircuitConfig:
     edge_topn: int | None = None
     edge_threshold: float | None = None
     edge_score_abs: bool = True
+    graph: bool = False
+    graph_node_topn: int = 25
+    graph_edge_threshold_ratio: float = 0.1
+    graph_edge_budget_multiplier: float = 3.0
+    graph_input_edge_limit_ratio: float = 0.3
     component_granularity: str = "head"
     rank_score_source: str = "normalized_abs"
     min_rank: int = 0

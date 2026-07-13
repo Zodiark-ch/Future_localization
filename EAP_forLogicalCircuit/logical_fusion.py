@@ -82,7 +82,7 @@ def _compute_gate_edge_ids(
     circuit_by_id = {edge.edge_id: edge for edge in circuit_edges}
     or_by_id = {edge.edge_id: edge for edge in circuit_or_edges}
 
-    # Approximate EAP-IG get_logical_edge.py behavior using destination-module fan-in counts.
+    # Approximate logical-gate behavior using destination-module fan-in counts.
     and_candidates = circuit_ids - or_ids
     or_candidates = or_ids - circuit_ids
     and_edge_ids = _filter_gate_edges(
@@ -130,7 +130,7 @@ def _filter_gate_edges(
     }
 
     # Fallback for phase1-minimal graph: each destination often has a single incoming edge
-    # (e.g. residual_stream -> module.input), so strict fan-in rule from EAP-IG would classify
+    # (e.g. residual_stream -> module.input), so a strict fan-in rule would classify
     # almost everything as ADDER. In that degenerate topology we label set-difference edges
     # directly as gate edges to preserve AND/OR signal for downstream conflict analysis.
     if strict_result:

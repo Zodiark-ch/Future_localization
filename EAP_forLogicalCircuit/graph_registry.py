@@ -49,7 +49,7 @@ class GraphRegistry:
         target_module_set = {item.strip() for item in target_modules if item.strip()}
         modules = _collect_layer_modules(model)
         if not modules:
-            raise ValueError("No transformer layer Linear modules found for EAP-IG graph construction.")
+            raise ValueError("No transformer layer Linear modules found for dense graph construction.")
 
         config = getattr(model, "config", None)
         num_layers = max(modules) + 1
@@ -57,7 +57,7 @@ class GraphRegistry:
         if num_attention_heads <= 0:
             num_attention_heads = _infer_num_attention_heads(modules)
         if num_attention_heads <= 0:
-            raise ValueError("Cannot infer num_attention_heads for EAP-IG graph construction.")
+            raise ValueError("Cannot infer num_attention_heads for dense graph construction.")
         num_key_value_heads = int(getattr(config, "num_key_value_heads", 0) or 0)
         if num_key_value_heads <= 0:
             num_key_value_heads = num_attention_heads
@@ -187,11 +187,11 @@ class GraphRegistry:
             )
 
         if not edge_targets:
-            raise ValueError("No EAP-IG graph edges were created. Check model module names.")
+            raise ValueError("No dense graph edges were created. Check model module names.")
 
         metadata = {
-            "graph_version": "eap_ig_head_graph_v1",
-            "edge_spec": "EAP-IG Graph.from_model head-level source/destination construction without neuron-level nodes",
+            "graph_version": "dense_head_graph_v1",
+            "edge_spec": "Dense residual-stream head-level source/destination construction without neuron-level nodes",
             "n_layers": num_layers,
             "n_heads": num_attention_heads,
             "num_key_value_heads": num_key_value_heads,
@@ -205,7 +205,19 @@ class GraphRegistry:
             "destination_count": len(destination_nodes),
             "edge_count": len(edge_targets),
             "target_modules": sorted(target_module_set),
-            "target_modules_note": "EAP-IG graph construction is node-based; q/k/v, mlp, logits destinations are included regardless of projection target list.",
+            "target_modules_note": "Dense graph construction is node-based; q/k/v, mlp, logits destinations are included regardless of projection target list.",
+            "has_attention_destinations_by_layer": [
+                _has_attention_destination(modules.get(layer_idx, {})) for layer_idx in range(num_layers)
+            ],
+            "has_attention_sources_by_layer": [
+                "o_proj" in modules.get(layer_idx, {}) for layer_idx in range(num_layers)
+            ],
+            "has_mlp_destinations_by_layer": [
+                _has_mlp_destination(modules.get(layer_idx, {})) for layer_idx in range(num_layers)
+            ],
+            "has_mlp_sources_by_layer": [
+                "down_proj" in modules.get(layer_idx, {}) for layer_idx in range(num_layers)
+            ],
         }
         return cls(edge_targets=edge_targets, metadata=metadata)
 
@@ -217,7 +229,7 @@ def build_graph_metadata_from_model(model: nn.Module, target_modules: Iterable[s
     target_module_set = {item.strip() for item in target_modules if item.strip()}
     modules = _collect_layer_modules(model)
     if not modules:
-        raise ValueError("No transformer layer Linear modules found for EAP-IG graph construction.")
+        raise ValueError("No transformer layer Linear modules found for dense graph construction.")
 
     config = getattr(model, "config", None)
     num_layers = max(modules) + 1
@@ -225,7 +237,7 @@ def build_graph_metadata_from_model(model: nn.Module, target_modules: Iterable[s
     if num_attention_heads <= 0:
         num_attention_heads = _infer_num_attention_heads(modules)
     if num_attention_heads <= 0:
-        raise ValueError("Cannot infer num_attention_heads for EAP-IG graph construction.")
+        raise ValueError("Cannot infer num_attention_heads for dense graph construction.")
     num_key_value_heads = int(getattr(config, "num_key_value_heads", 0) or 0)
     if num_key_value_heads <= 0:
         num_key_value_heads = num_attention_heads
@@ -243,8 +255,8 @@ def build_graph_metadata_from_model(model: nn.Module, target_modules: Iterable[s
         num_layers=num_layers,
     )
     return {
-        "graph_version": "eap_ig_head_graph_v1",
-        "edge_spec": "EAP-IG Graph.from_model head-level source/destination construction without neuron-level nodes",
+        "graph_version": "dense_head_graph_v1",
+        "edge_spec": "Dense residual-stream head-level source/destination construction without neuron-level nodes",
         "n_layers": num_layers,
         "n_heads": num_attention_heads,
         "num_key_value_heads": num_key_value_heads,
@@ -256,14 +268,14 @@ def build_graph_metadata_from_model(model: nn.Module, target_modules: Iterable[s
         "source_node_count": len(source_nodes),
         "destination_nodes": destination_nodes,
         "destination_count": len(destination_nodes),
-        "edge_count": _count_eap_ig_edges(
+        "edge_count": _count_graph_edges(
             modules=modules,
             num_layers=num_layers,
             num_attention_heads=num_attention_heads,
             parallel_attn_mlp=parallel_attn_mlp,
         ),
         "target_modules": sorted(target_module_set),
-        "target_modules_note": "EAP-IG graph construction is node-based; q/k/v, mlp, logits destinations are included regardless of projection target list.",
+        "target_modules_note": "Dense graph construction is node-based; q/k/v, mlp, logits destinations are included regardless of projection target list.",
         "has_attention_destinations_by_layer": [
             _has_attention_destination(modules.get(layer_idx, {})) for layer_idx in range(num_layers)
         ],
@@ -417,7 +429,7 @@ def _build_destination_node_names(
     return destination_nodes
 
 
-def _count_eap_ig_edges(
+def _count_graph_edges(
     modules: dict[int, dict[str, tuple[str, nn.Linear]]],
     num_layers: int,
     num_attention_heads: int,

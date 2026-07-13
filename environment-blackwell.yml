@@ -1,0 +1,33 @@
+name: future-localization-blackwell
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - pip>=25
+  - git
+  - graphviz
+  - numpy=1.26.4
+  - pip:
+      - --extra-index-url https://download.pytorch.org/whl/cu130
+      - torch==2.12.0+cu130
+      - transformers==4.37.2
+      - accelerate==0.26.1
+      - peft==0.10.0
+      - datasets==3.6.0
+      - huggingface-hub==0.36.2
+      - sentencepiece==0.2.0
+      - sentence-transformers==2.6.1
+      - pandas==2.3.0
+      - scipy==1.13.1
+      - scikit-learn==1.6.1
+      - matplotlib==3.9.4
+      - seaborn==0.13.2
+      - tqdm==4.67.1
+      - terminaltables==3.1.10
+      - sacrebleu==2.5.1
+      - rouge-score==0.1.2
+      - wandb==0.21.0
+      - lm-eval==0.4.9
+      - einops==0.8.2
+      - git+https://github.com/jinghanjia/fastargs.git

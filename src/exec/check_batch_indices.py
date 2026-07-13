@@ -1,22 +1,5 @@
 #!/usr/bin/env python3
-"""
-检查 test/retain 数据 batch 中的 input_ids、labels 是否与当前 tokenizer / config.vocab_size
-一致，避免 causal LM 的 cross_entropy 在 GPU 上 device-side assert。
 
-用法（在仓库根目录执行，脚本会把 ``src`` 加入 ``sys.path``）:
-
-  # 默认 --cache_dir 与 unlearn_model_conlict.py 里 overall.cache_dir 的 default 相同（见下方常量）
-  python src/exec/check_batch_indices.py \\
-    --model_name mistralai/Mistral-7B-v0.1 \\
-    --forget_dataset_name WMDPCyber \\
-    --retain_dataset_name IOI,gender
-
-  # 若要改用 HF 默认目录，显式传: --cache_dir \"\"  （见下方 argparse 说明）
-
-与 unlearn_model_conlict.py / Unlearn.init_model 中 tokenizer 处理保持一致
-（pad、eos、llama 分支），便于和训练脚本对齐排查。
-加 ``--local_files_only`` 时不访问网络，仅使用本地 cache（需已下载过同名模型）。
-"""
 
 from __future__ import annotations
 
@@ -28,11 +11,11 @@ import torch
 import transformers
 from transformers import AutoConfig, AutoTokenizer
 
-# 与 unlearn_model_conlict 一致：src/exec -> src 在 path 中
+
 _EXEC_DIR = os.path.dirname(os.path.abspath(__file__))
 _SRC_ROOT = os.path.abspath(os.path.join(_EXEC_DIR, ".."))
-# 仅 check 脚本使用：与 unlearn_model_conlict.py Section overall.cache_dir 的 default 保持同一字符串
-# （若你通过 config/命令行改了训练脚本的 cache，请对本脚本显式传 --cache_dir）
+
+
 _DEFAULT_HF_CACHE_DIR = "/home/chenhang/CSAT/.cache"
 if _SRC_ROOT not in sys.path:
     sys.path.insert(0, _SRC_ROOT)
@@ -41,15 +24,12 @@ from dataset import get_dataset  # noqa: E402
 
 
 def _prepare_cache_dir(cache_dir: str | None) -> str | None:
-    """
-    返回传给 from_pretrained 的 cache_dir；None 表示使用 Transformers 默认缓存。
-    会创建目录并检查可写，避免把文档占位路径当成真路径导致 PermissionError。
-    """
+
     if cache_dir is None:
         return None
     s = cache_dir.strip()
     if not s:
-        return None  # 显式传 "" 时由调用方先处理；见 main
+        return None
     if "你的" in s:
         print(
             "错误: --cache_dir 里出现了占位符「你的」，请删掉该参数（用默认缓存）或换成本机真实目录。\n"
@@ -91,7 +71,7 @@ def _violations_1d(
     upper: int,
     ignore: frozenset[int],
 ):
-    """返回 (count, 示例列表)。"""
+
     if flat.numel() == 0:
         return 0, []
     mask = torch.ones(flat.shape[0], dtype=torch.bool)
@@ -115,13 +95,13 @@ def check_batch(
     tokenizer_len: int,
     ignore_label: int = -100,
 ):
-    """对照 config.vocab_size（loss 里常用）与 len(tokenizer)（embedding 行数）。"""
+
     input_ids = batch["input_ids"]
     labels = batch["label"]
 
     ignore_f = frozenset({ignore_label})
 
-    # input_ids 一般不应出现 -100；若出现也标出
+
     flat_in = input_ids.reshape(-1)
     cnt_neg_in = int((flat_in < 0).sum().item())
     cnt_ge_tok = int((flat_in >= tokenizer_len).sum().item())
@@ -186,7 +166,7 @@ def main():
     args = parser.parse_args()
 
     if_llama = "llama" in args.model_name.lower()
-    # 显式传空字符串表示使用 HF 默认缓存（与训练脚本不同）
+
     _raw_cache = args.cache_dir
     if isinstance(_raw_cache, str) and not _raw_cache.strip():
         cache_dir = None
