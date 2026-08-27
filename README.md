@@ -11,12 +11,14 @@ Future Localization estimates which model mechanisms will become important after
 Citation metadata will be added after publication. The placeholder below is intentionally incomplete.
 
 ```bibtex
-@article{future_localization_todo,
-  title   = {Beyond Static Interpretability: Anticipating Post-SFT Mechanisms from Current Parameters for Better Tuning},
-  author  = {TODO},
-  journal = {TODO},
-  year    = {TODO},
-  url     = {TODO}
+@misc{chen2026staticinterpretabilityanticipatingpostsft,
+      title={Beyond Static Interpretability: Anticipating Post-SFT Mechanisms from Pre-SFT Parameters for Better Tuning}, 
+      author={Hang Chen and Jiaying Zhu and Wenya Wang},
+      year={2026},
+      eprint={2608.24482},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2608.24482}, 
 }
 ```
 
