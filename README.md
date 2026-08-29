@@ -6,7 +6,30 @@ Official implementation for the paper:
 
 Future Localization estimates which model mechanisms will become important after supervised fine-tuning (SFT), while operating from the current model parameters and a lightweight probing checkpoint. The repository supports component-level, neuron-level, and multi-task logical-circuit localization, followed by masked fine-tuning with optional component-wise LoRA.
 
+## Citation
 
+Citation metadata will be added after publication. The placeholder below is intentionally incomplete.
+```bibtex
+@misc{chen2026staticinterpretabilityanticipatingpostsft,
+      title={Beyond Static Interpretability: Anticipating Post-SFT Mechanisms from Pre-SFT Parameters for Better Tuning}, 
+      author={Hang Chen and Jiaying Zhu and Wenya Wang},
+      year={2026},
+      eprint={2608.24482},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2608.24482}, 
+}
+```
+
+
+## Installation
+
+Clone the repository and enter its root directory:
+
+```bash
+git clone https://github.com/Zodiark-ch/Future_localization.git
+cd Future_localization
+```
 
 Two isolated Conda environments are provided. Do not mix their PyTorch or CUDA packages.
 
