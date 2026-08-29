@@ -8,7 +8,7 @@ Future Localization estimates which model mechanisms will become important after
 
 ## Citation
 
-Citation metadata will be added after publication. The placeholder below is intentionally incomplete.
+Citation metadata will be added after publication. 
 ```bibtex
 @misc{chen2026staticinterpretabilityanticipatingpostsft,
       title={Beyond Static Interpretability: Anticipating Post-SFT Mechanisms from Pre-SFT Parameters for Better Tuning}, 
